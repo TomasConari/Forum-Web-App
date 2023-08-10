@@ -1,7 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { conn } from "./src/database/db.js";
-import userRoutes from "./src/routes/user.routes.js"
+import { conn } from "./database/db.js";
+import userRoutes from "./routes/user.routes.js"
 
 const app = express();
 
