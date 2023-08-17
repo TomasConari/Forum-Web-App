@@ -2,7 +2,11 @@ import { Schema, model } from "mongoose";
 import { commentSchema } from "./comment.model.js";
 
 export const postSchema = new Schema({
-    tittle: {
+    user: {
+        type: String,
+        require: true
+    },
+    title: {
         type: String,
         require: true
     },

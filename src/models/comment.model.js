@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 
 export const commentSchema = new Schema({
-    username: {
+    user: {
         type: String,
         require: true
     },

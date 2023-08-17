@@ -1,7 +1,9 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { conn } from "./database/db.js";
-import userRoutes from "./routes/user.routes.js"
+import userRoutes from "./routes/user.routes.js";
+import postRoutes from "./routes/post.routes.js";
+import commentRoutes from "./routes/comment.routes.js";
 
 const app = express();
 
@@ -12,6 +14,8 @@ const PORT = 8000;
 
 //routes
 app.use(userRoutes);
+app.use(postRoutes);
+app.use(commentRoutes);
 
 conn();
 
