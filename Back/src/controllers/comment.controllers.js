@@ -4,16 +4,18 @@ import { Comment } from "../models/comment.model.js";
 
 export const commentControllers = {
     create: async (req, res) => {
-        const { text, postTitle } = req.body;
-        const { username } = req.user;
+        const { id, paramsUsername } = req.params;
+        const { text } = req.body;
+        const { userUsername } = req.user;
         try{
             const newComment = new Comment({
-                user: username,
+                user: userUsername,
                 text,
+                from: id
             });
             const savedComment = await newComment.save();
-            const userToUpdate = await User.findOne({ username: username });
-            const postToUpdate = await Post.findOne({ title: postTitle });
+            const userToUpdate = await User.findOne({ username: paramsUsername });
+            const postToUpdate = await Post.findById(id);
             if(userToUpdate && postToUpdate){
                 const postIndex = userToUpdate.posts.findIndex(post => post._id.equals(postToUpdate._id));
                 if(postIndex !== -1){
@@ -78,6 +80,54 @@ export const commentControllers = {
                 error: error.message
             });
         };
-    }
+    },
+    delete: async (req, res) => {
+        const { id } = req.params;
+        try {
+            const deletedComment = await Comment.findByIdAndDelete(id);
+            if (!deletedComment) {
+                return res.status(404).json({ message: "Comment not found" });
+            };
+            const userToUpdate = await User.findOne({ username: deletedComment.user });
+            if (userToUpdate) {
+                userToUpdate.posts.forEach((post) => {
+                    post.comments = post.comments.filter((comment) => !comment.equals(deletedComment._id));
+                });
+                await userToUpdate.save();
+            }
+            await Post.updateMany(
+                { 'comments._id': deletedComment._id },
+                { $pull: { comments: { _id: deletedComment._id } } }
+            );
+            res.status(200).json({ message: "Comment deleted successfully" });
+        } catch (error) {
+            res.status(500).json({ message: "An error occurred during the delete" });
+        }
+    },
+    getAll: async (req, res) => {
+        try{
+            const allComments = await Comment.find();
+            res.status(200).json({ 
+                data: allComments
+            });
+        }catch(error){
+            res.status(500).json({
+                message: "An error occurred while retrieving the comments"
+            });
+        };
+    },
+    getOne: async (req, res) => {
+        const data = req.body;
+        try{
+            const comment = await Comment.findOne(data);
+            res.status(200).json({ 
+                data: comment
+            });
+        }catch(error){
+            res.status(500).json({
+                message: "An error occurred while retrieving the comment"
+            });
+        };
+    }  
 };
 

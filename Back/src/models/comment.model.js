@@ -8,7 +8,11 @@ export const commentSchema = new Schema({
     text: {
         type: String,
         require: true
-    }
+    },
+    from: {
+        type: String,
+        require: true
+    },
 },
 {
     timestamps: true

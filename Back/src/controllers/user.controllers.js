@@ -1,4 +1,6 @@
+import { Post } from "../models/post.model.js";
 import { User } from "../models/user.model.js";
+import { Comment } from "../models/comment.model.js";
 import * as bcrypt from "bcrypt";
 import Jwt from "jsonwebtoken";
 
@@ -85,6 +87,8 @@ export const userControllers = {
         if((userUsername === paramsUsername) || (role === "admin")){
             try{
                 await User.deleteOne({username:paramsUsername});
+                await Post.deleteMany({ user: userUsername });
+                await Comment.deleteMany({ user: userUsername });
                 res.status(200).json({ 
                 message: "User deleted successfully",
                 });

@@ -1,5 +1,6 @@
 import { Post } from "../models/post.model.js";
 import { User } from "../models/user.model.js";
+import { Comment } from "../models/comment.model.js";
 
 export const postControllers = {
     create: async (req, res) => {
@@ -59,6 +60,7 @@ export const postControllers = {
                 await userToUpdate.save();
             }
             res.status(200).json({ message: "Post deleted successfully" });
+            await Comment.deleteMany({ from: deletedPost._id });
         } catch (error) {
             res.status(500).json({ message: "An error occurred during the delete" });
         };
