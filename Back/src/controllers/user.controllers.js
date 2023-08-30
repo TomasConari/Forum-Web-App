@@ -27,30 +27,38 @@ export const userControllers = {
     login: async (req, res) => {
         const { username, password } = req.body;
         try {
-            const user = await User.findOne({ username: username });
-            const hash = user.password;
-            bcrypt.compare(password, hash, (err, result) => {
-                if (result) {
-                    const { _id, name, lastname, username } = user;
-                    const payload = {
-                        id: _id,
-                        name,
-                        lastname,
-                        username
-                    };
-                    const token = Jwt.sign(payload, "secretKey");
-                    res.status(200).json({
-                        token
-                    });
-                } else {
-                    res.status(401).json({
-                        message: "Incorrect Password"
-                    });
-                };
+          const user = await User.findOne({ username: username });
+          if (!user) {
+            return res.status(401).json({
+              message: "User not found"
             });
+          }
+          const hash = user.password;
+          bcrypt.compare(password, hash, (err, result) => {
+            if (result) {
+              const { _id, name, lastname, username } = user;
+              const payload = {
+                id: _id,
+                name,
+                lastname,
+                username
+              };
+              const token = Jwt.sign(payload, "secretKey");
+              res.status(200).json({
+                token
+              });
+            } else {
+              res.status(401).json({
+                message: "Incorrect Password"
+              });
+            }
+          });
         } catch (error) {
-            throw new Error;
-        };
+          console.error(error);
+          res.status(500).json({
+            message: "Internal Server Error"
+          });
+        }
     },
     update: async (req, res) => {
         const { username: userUsername, role} = req.user;
