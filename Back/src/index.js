@@ -9,8 +9,11 @@ import cors from "cors";
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:5173"
-}));
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  }));
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -25,5 +28,5 @@ app.use(commentRoutes);
 conn();
 
 app.listen(PORT, () => {
-    console.log(`Running in http://localhost:${PORT}`);
+    console.log(`Running in http://192.168.20.30:${PORT}`);
 });
