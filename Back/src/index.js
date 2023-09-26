@@ -28,5 +28,5 @@ app.use(commentRoutes);
 conn();
 
 app.listen(PORT, () => {
-    console.log(`Running in http://192.168.20.30:${PORT}`);
+    console.log(`Running in http://localhost:${PORT}`);
 });

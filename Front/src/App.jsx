@@ -6,7 +6,7 @@ const App = () => {
 
   //Variables
 
-  const host = "http://192.168.20.30:8000";
+  const host = "http://localhost:8000";
 
   //States
 
@@ -61,14 +61,19 @@ const App = () => {
         setAuth(true);
         localStorage.setItem('auth-token', responseJson.token);
       }else if(response.status === 401){
+        setUser((prevUser) => {
+          const newUser = {...prevUser};
+          newUser.password = "";
+          return newUser;
+        });
         setError("Incorrect username or password");
         setTimeout(() => setError(""), 4000);
       }else{
-        setError("An error occurred");
+        setError("An error occurred, please try again later");
         setTimeout(() => setError(""), 4000);
       };
     }catch(error){
-      setError("An error occurred");
+      setError("An error occurred, please try again later");
       setTimeout(() => setError(""), 4000);
     };
   };
@@ -141,7 +146,7 @@ const App = () => {
       <div>
         <div>
           <input type="text" placeholder="Username" onChange={(event) => setUserAndPassword('username', event)} />
-          <input type="password" placeholder="Password" onChange={(event) => setUserAndPassword('password', event)} />
+          <input type="password" value={user.password} placeholder="Password" onChange={(event) => setUserAndPassword('password', event)} />
           <button onClick={login}>Login</button>
         </div>
         <div>
