@@ -24,15 +24,21 @@ How to see it?
 
 Project Info:
 
-    -The application functions as a basic forum social network.
+    - The application functions as a basic forum social network.
     You can create an account, log in, create posts, and view those of other users.
     
-    -Despite the project has been delivered and evaluated by the bootcamp, 
+    - Despite the project has been delivered and evaluated by the bootcamp, 
     I will continue to develop it and implement improvements.
 
+Changelog:
+
+    1.1.0 Version:
+        -Minor Login and SignUp Functionality Fixes.
+        -Updated Login UI.
+        -Login and Signup Are Now Individual Components.
+        
 My Links:
 
     -Linkedin: https://www.linkedin.com/in/tomascontreras1307/
     -Github: https://github.com/TomasConari
     -Email: tomasconari@gmail.com
-    
