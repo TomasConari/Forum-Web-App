@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { Dashboard } from './components/dashboard';
+import { Dashboard } from './components/Dashboard';
 
 const App = () => {
 
   //Variables
 
-  const host = "http://localhost:8000";
+  const host = "http://192.168.20.30:8000";
 
   //States
 
@@ -90,10 +90,27 @@ const App = () => {
         headers: header,
         body: JSON.stringify(signUser)
       });
+      try{
+        if(response.status === 201){
+          setSignUser({
+            name: '',
+            lastname: '',
+            username: '',
+            password: ''
+          });
+          setError(`User created, please Log In`);
+          setTimeout(() => setError(""), 5000);
+        };
+      }catch(error){
+        setError("User Created, message error");
+        setTimeout(() => setError(""), 4000);
+      };
     }catch(error){
       setError("An error occurred");
+      setTimeout(() => setError(""), 4000);
     };
   };
+  console.log(signUser)
 
   const logout = () => {
     localStorage.removeItem('auth-token');
@@ -128,10 +145,10 @@ const App = () => {
           <button onClick={login}>Login</button>
         </div>
         <div>
-          <input type="text" placeholder="Name" onChange={(event) => setSignUp('name', event)} />
-          <input type="text" placeholder="Lastname" onChange={(event) => setSignUp('lastname', event)} />
-          <input type="text" placeholder="Username" onChange={(event) => setSignUp('username', event)} />
-          <input type="password" placeholder="Password" onChange={(event) => setSignUp('password', event)} />
+          <input type="text" value={signUser.name} placeholder="Name" onChange={(event) => setSignUp('name', event)} />
+          <input type="text" value={signUser.lastname}placeholder="Lastname" onChange={(event) => setSignUp('lastname', event)} />
+          <input type="text" value={signUser.username} placeholder="Username" onChange={(event) => setSignUp('username', event)} />
+          <input type="password" value={signUser.password} placeholder="Password" onChange={(event) => setSignUp('password', event)} />
           <button onClick={signUp}>SignUp</button>
         </div>
         {error && <p>{error}</p>}
