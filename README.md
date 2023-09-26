@@ -33,7 +33,9 @@ Project Info:
 Changelog:
 
     1.1.0 Version:
-        -Minor Login and SignUp Fixes.
+        -Minor Login and SignUp Functionality Fixes.
+        -Updated Login UI.
+        -Login and Signup Are Now Individual Components.
 
 My Links:
 
