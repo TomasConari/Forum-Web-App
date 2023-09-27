@@ -79,6 +79,15 @@ export const Dashboard = ({ host, header }) => {
         </div>
         );
     }else{
-        return <div>No Posts available</div>;
+        return(
+            <div>
+                <h2>No Posts available</h2>
+                <h1>Create Post</h1>
+                <input type="text" placeholder="Tittle" onChange={(event) => savePostForm('title', event)} />
+                <input type="text" placeholder="Text" onChange={(event) => savePostForm('text', event)} />
+                <button onClick={createPost}>Post It</button>
+                {postResponse && <p>{postResponse}</p>}
+            </div>
+        );
     };
 };

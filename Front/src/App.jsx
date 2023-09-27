@@ -64,7 +64,9 @@ const App = () => {
             <SignUp 
               hostProp={host} 
               errorProp={setError} 
-              headerProp={header} 
+              headerProp={header}
+              setLoginProp={setLogin}
+              loginProp={login}
             />
           }
           <div className='buttons'>
