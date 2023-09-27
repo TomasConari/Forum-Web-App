@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export const SignUp = ({ hostProp, headerProp, errorProp }) => {
+export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginProp}) => {
 
     const [signUser, setSignUser] = useState({
         name: '',
@@ -35,13 +35,14 @@ export const SignUp = ({ hostProp, headerProp, errorProp }) => {
                 body: JSON.stringify(signUser)
             });
             try {
-                if (response.status === 201) {
+                if(response.status === 201) {
                     setSignUser({
                         name: '',
                         lastname: '',
                         username: '',
                         password: ''
                     });
+                    setLoginProp(!loginProp);
                     errorProp(`User created, please Log In`);
                     setTimeout(() => errorProp(""), 6000);
                 };
