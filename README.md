@@ -30,12 +30,10 @@ Project Info:
     - Despite the project has been delivered and evaluated by the bootcamp, 
     I will continue to develop it and implement improvements.
 
-Changelog:
+Last Changes:
 
-    1.1.0 Version:
-        -Minor Login and SignUp Functionality Fixes.
-        -Updated Login UI.
-        -Login and Signup Are Now Individual Components.
+    1.1.1 Version:
+        -User Controllers and Routes Updated.
 
 My Links:
 
