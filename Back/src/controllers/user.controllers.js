@@ -96,13 +96,15 @@ export const userControllers = {
     },
     update: async (req, res) => {
         try{
-            const { username: userUsername, role} = req.user;
-            const { username: paramsUsername } = req.params;
+            const { username: localUser, role: localRole} = req.user;
+            const { username: paramUser } = req.params;
             const newData = req.body;
-            if((userUsername === paramsUsername) || (role === "admin")){
+            if((localUser === paramUser) || (localRole === "admin")){
                 try{
-                    const updatedUser = await User.findOneAndUpdate({ username: paramsUsername }, newData, { new: true });
-                    if(updatedUser === null){
+                    const updatedUser = await User.findOneAndUpdate({ username: paramUser }, newData, { new: true });
+                    const updatePosts = await Post.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                    const updateComments = await Comment.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                    if(!(updatedUser === null) && ((updatePosts === null) && (updateComments === null))){
                         res.status(500).json({
                             message: "Could not Find and Update the User"
                         });
