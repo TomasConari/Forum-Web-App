@@ -19,6 +19,7 @@ export const userControllers = {
                 await User.create(newUser);
                 return res.status(201).json({
                     ok: true,
+                    message: "User Created",
                     data: newUser
                 });
             }catch(error){

@@ -34,6 +34,7 @@ Last Changes:
 
     1.1.1 Version:
         -User Controllers and Routes Updated.
+        -Post Controllers and Routes Updated.
 
 My Links:
 
