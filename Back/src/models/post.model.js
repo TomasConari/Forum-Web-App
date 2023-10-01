@@ -1,5 +1,4 @@
 import { Schema, model } from "mongoose";
-import { commentSchema } from "./comment.model.js";
 
 export const postSchema = new Schema({
     user: {
@@ -13,9 +12,6 @@ export const postSchema = new Schema({
     text: {
         type: String,
         require: true
-    },
-    comments:{
-        type: [commentSchema]
     }
 },
 {

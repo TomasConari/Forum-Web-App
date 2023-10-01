@@ -6,108 +6,196 @@ import Jwt from "jsonwebtoken";
 
 export const userControllers = {
     create: async (req, res) => {
-        const { name, lastname, username, password } = req.body;
-        try {
-            const hash = await bcrypt.hash(password, 10);
-            const newUser = {
-                name,
-                lastname,
-                username,
-                password: hash
+        try{
+            const { name, lastname, username, password } = req.body;
+            try{
+                const hash = await bcrypt.hash(password, 10);
+                const newUser = {
+                    name,
+                    lastname,
+                    username,
+                    password: hash
+                };
+                await User.create(newUser);
+                return res.status(201).json({
+                    ok: true,
+                    message: "User Created",
+                    data: newUser
+                });
+            }catch(error){
+                console.error(error);
+                return res.status(500).json({
+                    ok: false,
+                    error: "Error Creating User"
+                });
             };
-            await User.create(newUser);
-            res.status(201).json({
-                ok: true,
-                data: newUser
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                error: "Missing Fields"
             });
-        } catch (error) {
-            throw new Error;
         };
     },
     login: async (req, res) => {
-        const { username, password } = req.body;
-        try {
-          const user = await User.findOne({ username: username });
-          if (!user) {
-            return res.status(401).json({
-              message: "User not found"
-            });
-          }
-          const hash = user.password;
-          bcrypt.compare(password, hash, (err, result) => {
-            if (result) {
-              const { _id, name, lastname, username } = user;
-              const payload = {
-                id: _id,
-                name,
-                lastname,
-                username
-              };
-              const token = Jwt.sign(payload, "secretKey");
-              res.status(200).json({
-                token
-              });
-            } else {
-              res.status(401).json({
-                message: "Incorrect Password"
-              });
-            }
-          });
-        } catch (error) {
-          console.error(error);
-          res.status(500).json({
-            message: "Internal Server Error"
-          });
-        }
-    },
-    update: async (req, res) => {
-        const { username: userUsername, role} = req.user;
-        const { username: paramsUsername } = req.params;
-        const newData = req.body;
-        if((userUsername === paramsUsername) || (role === "admin")){
-            try {
-                const updatedUser = await User.findOneAndUpdate({ username: paramsUsername }, newData, { new: true });
-                if (updatedUser === null) {
-                    res.status(500).json({
-                        message: "Could not find and update the user"
-                    });
-                } else {
-                    res.status(200).json({
-                        message: "User Updated",
-                        data: updatedUser
+        try{
+            const { username, password } = req.body;
+            try{
+                const user = await User.findOne({ username: username });
+                if(!user){
+                    return res.status(401).json({
+                    message: "User not found"
                     });
                 };
-            } catch (error) {
-                res.status(500).json({
-                    message: "An error occurred during the update"
+                const hash = user.password;
+                try{
+                    bcrypt.compare(password, hash, (err, result) => {
+                        if(result){
+                            try{
+                                const { _id, name, lastname, username, role } = user;
+                                const payload = {
+                                    id: _id,
+                                    name,
+                                    lastname,
+                                    username,
+                                    role
+                                };
+                                const token = Jwt.sign(payload, "secretKey");
+                                res.status(200).json({
+                                    token
+                                });
+                            }catch(error){
+                                console.error(error);
+                                return res.status(500).json({
+                                    message: "Error Loading The Payload"
+                                });
+                            };
+                        }else{
+                            res.status(401).json({
+                                message: "Incorrect Password"
+                            });
+                        };
+                    });
+                }catch(error){
+                    console.error(error);
+                    return res.status(500).json({
+                        message: "Error Verifying The Password"
+                    });
+                };
+            }catch(error){
+                console.error(error);
+                return res.status(500).json({
+                    message: "Internal Server Error"
                 });
             };
-        }else{
-            res.status(403).json({ 
-                message: "Unauthorized",
-                role: role
+        }catch{
+            console.error(error);
+            return res.status(500).json({
+                message: "Missing Fields"
+            });
+        };
+    },
+    update: async (req, res) => {
+        try{
+            const { username: localUser, role: localRole} = req.user;
+            const { username: paramUser } = req.params;
+            const newData = req.body;
+            if((localUser === paramUser) || (localRole === "admin")){
+                try{
+                    const updatedUser = await User.findOneAndUpdate({ username: paramUser }, newData, { new: true });
+                    const updatePosts = await Post.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                    const updateComments = await Comment.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                    if(!(updatedUser === null) && ((updatePosts === null) && (updateComments === null))){
+                        res.status(500).json({
+                            message: "Could not Find and Update the User"
+                        });
+                    }else{
+                        res.status(200).json({
+                            message: "User Updated",
+                            data: updatedUser
+                        });
+                    };
+                }catch(error){
+                    console.error(error);
+                    res.status(500).json({
+                        message: "An Error Occurred During the Update"
+                    });
+                };
+            }else{
+                res.status(403).json({ 
+                    message: "Unauthorized",
+                    role: role
+                });
+            };
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                error: "Missing Fields"
             });
         };
     },
     delete: async (req, res) => {
-        const { username: userUsername, role} = req.user;
-        const { username: paramsUsername } = req.params;
-        if((userUsername === paramsUsername) || (role === "admin")){
+        try{
+            const { username: localUser, role: localRole } = req.user;
             try{
-                await User.deleteOne({username:paramsUsername});
-                await Post.deleteMany({ user: userUsername });
-                await Comment.deleteMany({ user: userUsername });
-                res.status(200).json({ 
-                message: "User deleted successfully",
-                });
-            }catch (error){
-                res.status(500).json({ 
-                    message: "An error occurred during the delete" 
+                const { username: bodyUser, id: bodyId} = req.body;
+                try{
+                    if((localUser === bodyUser) || (localRole === "admin")){
+                        try{
+                            try{
+                                await Comment.deleteMany({ from: bodyId });
+                                await Comment.deleteMany({ user: localUser });
+                            }catch(error){
+                                console.error(error);
+                                return res.status(500).json({
+                                    ok: false,
+                                    error: "An Error Occurred Deleting the Comments"
+                                });
+                            };
+                            try{
+                                await Post.deleteMany({ user: bodyUser });
+                            }catch(error){
+                                console.error(error);
+                                return res.status(500).json({
+                                    ok: false,
+                                    error: "An Error Occurred Deleting the Posts"
+                                });
+                            };
+                            await User.deleteOne({ username: bodyUser });
+                            res.status(200).json({
+                                message: "User deleted successfully",
+                            });
+                        }catch(error){
+                            console.error(error);
+                            return res.status(500).json({
+                                message: "An Error Occurred Deleting the User"
+                            });
+                        };
+                    }else{
+                        return res.status(403).json({
+                            message: "Unauthorized"
+                        });
+                    };
+                }catch(error){
+                    console.error(error);
+                    return res.status(500).json({
+                        ok: false,
+                        error: "An Error Occurred During The Delete"
+                    });
+                };
+            }catch(error){
+                console.error(error);
+                return res.status(500).json({
+                    ok: false,
+                    error: "Error Getting Body Info"
                 });
             };
-        }else{
-            res.status(403).json({ 
-                message: "Unauthorized" 
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                error: "Error Getting Local User Info"
             });
         };
     },
@@ -119,7 +207,7 @@ export const userControllers = {
             });
         }catch(error){
             res.status(500).json({
-                message: "An error occurred while retrieving workers"
+                message: "An Error Occurred While Retrieving Users"
             });
         };
     },
@@ -132,7 +220,7 @@ export const userControllers = {
             });
         }catch(error){
             res.status(500).json({
-                message: "An error occurred while retrieving the user"
+                message: "An Error Occurred While Searching the User(s)"
             });
         };
     },
@@ -145,8 +233,8 @@ export const userControllers = {
             });
         }catch(error){
             res.status(500).json({
-                message: "An error occurred while retrieving the user"
+                message: "An Error Occurred While Retrieving the User"
             });
         };
     }
-}
+};

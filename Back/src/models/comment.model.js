@@ -5,6 +5,10 @@ export const commentSchema = new Schema({
         type: String,
         require: true
     },
+    title: {
+        type: String,
+        require: true
+    },
     text: {
         type: String,
         require: true

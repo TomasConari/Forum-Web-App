@@ -1,5 +1,4 @@
 import { Schema, model } from "mongoose";
-import { postSchema } from "./post.model.js";
 
 export const userSchema = new Schema({
     name: {
@@ -22,9 +21,6 @@ export const userSchema = new Schema({
         type: String,
         require: true,
         default: "user"
-    },
-    posts: {
-        type: [postSchema]
     }
 },
 {
