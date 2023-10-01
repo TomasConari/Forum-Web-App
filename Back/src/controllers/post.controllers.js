@@ -38,8 +38,8 @@ export const postControllers = {
             const { postUser, title, text } = req.body;
             const { username: localUser, role: localRole } = req.user;
             const newData = {
-                title: title,
-                text: text
+                title,
+                text
             };
             try{
                 if((localUser === postUser) || (localRole === "admin")){
@@ -48,7 +48,7 @@ export const postControllers = {
                         if(updatedPost === null){
                             return res.status(500).json({
                                 ok: false,
-                                message: "Could Not Find and Update the Post in Db Sided" 
+                                message: "Could Not Find and Update the Post in Db Side" 
                             });
                         };
                         return res.status(200).json({
