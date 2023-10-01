@@ -5,7 +5,7 @@ export const commentControllers = {
         try{
             const { id } = req.params;
             const { title, text } = req.body;
-            const { localUser } = req.user;
+            const { username: localUser } = req.user;
             try{
                 const newComment = {
                     user: localUser,
@@ -16,7 +16,7 @@ export const commentControllers = {
                 await Comment.create(newComment);
                 return res.status(201).json({
                     ok: true,
-                    message: "Post Created",
+                    message: "Comment Created",
                     data: newComment
                 });
             }catch(error){

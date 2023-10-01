@@ -44,7 +44,8 @@ export const userControllers = {
                 const user = await User.findOne({ username: username });
                 if(!user){
                     return res.status(401).json({
-                    message: "User not found"
+                        ok: false,
+                        message: "User not found"
                     });
                 };
                 const hash = user.password;
@@ -61,17 +62,20 @@ export const userControllers = {
                                     role
                                 };
                                 const token = Jwt.sign(payload, "secretKey");
-                                res.status(200).json({
+                                return res.status(200).json({
+                                    ok: true,
                                     token
                                 });
                             }catch(error){
                                 console.error(error);
                                 return res.status(500).json({
+                                    ok: false,
                                     message: "Error Loading The Payload"
                                 });
                             };
                         }else{
-                            res.status(401).json({
+                            return res.status(401).json({
+                                ok: false,
                                 message: "Incorrect Password"
                             });
                         };
@@ -79,18 +83,21 @@ export const userControllers = {
                 }catch(error){
                     console.error(error);
                     return res.status(500).json({
+                        ok: false,
                         message: "Error Verifying The Password"
                     });
                 };
             }catch(error){
                 console.error(error);
                 return res.status(500).json({
+                    ok: false,
                     message: "Internal Server Error"
                 });
             };
         }catch{
             console.error(error);
             return res.status(500).json({
+                ok: false,
                 message: "Missing Fields"
             });
         };
@@ -99,32 +106,104 @@ export const userControllers = {
         try{
             const { username: localUser, role: localRole} = req.user;
             const { username: paramUser } = req.params;
-            const newData = req.body;
-            if((localUser === paramUser) || (localRole === "admin")){
+            const { 
+                currentPassword: bodyCurrentPassword, 
+                newPassword: bodyNewPassword, 
+                name: bodyName, 
+                lastname: bodyLastname, 
+                username: bodyUser 
+            } = req.body;
+            const newHash = await bcrypt.hash(bodyNewPassword, 10);
+            const newData = {
+                name: bodyName,
+                lastname: bodyLastname,
+                username: bodyUser,
+                password: newHash
+            };
+            if(localUser === paramUser){
                 try{
-                    const updatedUser = await User.findOneAndUpdate({ username: paramUser }, newData, { new: true });
-                    const updatePosts = await Post.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
-                    const updateComments = await Comment.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
-                    if(!(updatedUser === null) && ((updatePosts === null) && (updateComments === null))){
-                        res.status(500).json({
-                            message: "Could not Find and Update the User"
+                    const user = await User.findOne({ username: paramUser });
+                    if(!user){
+                        return res.status(401).json({
+                            ok: false,
+                            message: "User not found"
                         });
-                    }else{
-                        res.status(200).json({
-                            message: "User Updated",
-                            data: updatedUser
+                    };
+                    const hash = user.password;
+                    try{
+                        bcrypt.compare(bodyCurrentPassword, hash, async (err, result) => {
+                            if(result){
+                                try{
+                                    const updatedUser = await User.findOneAndUpdate({ username: paramUser }, newData, { new: true });
+                                    const updatePosts = await Post.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                                    const updateComments = await Comment.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                                    if(!(updatedUser === null) && ((updatePosts === null) && (updateComments === null))){
+                                        return res.status(500).json({
+                                            ok: false,
+                                            message: "Could not Find and Update the User"
+                                        });
+                                    }else{
+                                        const { _id, name, lastname, username, role } = updatedUser;
+                                        const payload = {
+                                            id: _id,
+                                            name,
+                                            lastname,
+                                            username,
+                                            role
+                                        };
+                                        const token = Jwt.sign(payload, "secretKey");
+                                        return res.status(200).json({
+                                            ok: true,
+                                            token,
+                                            updatedUser
+                                        });
+                                    };
+                                }catch(error){
+                                    console.error(error);
+                                    return res.status(500).json({
+                                        ok: false,
+                                        message: "Error Updating the User"
+                                    });
+                                };
+                            }else{
+                                return res.status(401).json({
+                                    ok: false,
+                                    message: "Incorrect Password"
+                                });
+                            };
+                        });
+                    }catch(error){
+                        console.error(error);
+                        return res.status(500).json({
+                            ok: false,
+                            message: "Error Verifying The Password"
                         });
                     };
                 }catch(error){
                     console.error(error);
                     res.status(500).json({
+                        ok: false,
                         message: "An Error Occurred During the Update"
+                    });
+                };
+            }else if(localRole === "admin"){
+                const updatedUser = await User.findOneAndUpdate({ username: paramUser }, newData, { new: true });
+                const updatePosts = await Post.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                const updateComments = await Comment.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                if(!(updatedUser === null) && ((updatePosts === null) && (updateComments === null))){
+                    res.status(500).json({
+                        message: "Could not Find and Update the User"
+                    });
+                }else{
+                    res.status(200).json({
+                        message: "User Updated",
+                        data: updatedUser
                     });
                 };
             }else{
                 res.status(403).json({ 
                     message: "Unauthorized",
-                    role: role
+                    role: localRole
                 });
             };
         }catch(error){
@@ -138,33 +217,52 @@ export const userControllers = {
     delete: async (req, res) => {
         try{
             const { username: localUser, role: localRole } = req.user;
+            const { username : paramUser } = req.params;
+            const user = await User.findOne({ username: paramUser });
+            const posts = await Post.find({ user: paramUser });
+            const postIds = posts.map((post) => post._id);
+            const idsArray = Object.values(postIds);
+            const length = idsArray.length;
             try{
-                const { username: bodyUser, id: bodyId} = req.body;
+                const hash = user.password;
+                const { password } = req.body;
                 try{
-                    if((localUser === bodyUser) || (localRole === "admin")){
+                    if(localUser === paramUser){
                         try{
-                            try{
-                                await Comment.deleteMany({ from: bodyId });
-                                await Comment.deleteMany({ user: localUser });
-                            }catch(error){
-                                console.error(error);
-                                return res.status(500).json({
-                                    ok: false,
-                                    error: "An Error Occurred Deleting the Comments"
-                                });
-                            };
-                            try{
-                                await Post.deleteMany({ user: bodyUser });
-                            }catch(error){
-                                console.error(error);
-                                return res.status(500).json({
-                                    ok: false,
-                                    error: "An Error Occurred Deleting the Posts"
-                                });
-                            };
-                            await User.deleteOne({ username: bodyUser });
-                            res.status(200).json({
-                                message: "User deleted successfully",
+                            bcrypt.compare(password, hash, async (err, result) => {
+                                if(result){
+                                    try{
+                                        for(let i = 0; i < length; i += 1){
+                                            await Comment.deleteMany({ from: idsArray[i] });
+                                        };
+                                        await Comment.deleteMany({ user: localUser });
+                                    }catch(error){
+                                        console.error(error);
+                                        return res.status(500).json({
+                                            ok: false,
+                                            error: "An Error Occurred Deleting the Comments"
+                                        });
+                                    };
+                                    try{
+                                        await Post.deleteMany({ user: paramUser });
+                                    }catch(error){
+                                        console.error(error);
+                                        return res.status(500).json({
+                                            ok: false,
+                                            error: "An Error Occurred Deleting the Posts"
+                                        });
+                                    };
+                                    await User.deleteOne({ username: paramUser });
+                                    return res.status(200).json({
+                                        ok: true,
+                                        message: "User deleted successfully",
+                                    });
+                                }else{
+                                    return res.status(401).json({
+                                        ok: false,
+                                        message: "Incorrect Password"
+                                    });
+                                };
                             });
                         }catch(error){
                             console.error(error);
@@ -172,6 +270,32 @@ export const userControllers = {
                                 message: "An Error Occurred Deleting the User"
                             });
                         };
+                    }else if(localRole === "admin"){
+                        try{
+                            for(let i = 0; i < length; i += 1){
+                                await Comment.deleteMany({ from: idsArray[i] });
+                            };
+                            await Comment.deleteMany({ user: localUser });
+                        }catch(error){
+                            console.error(error);
+                            return res.status(500).json({
+                                ok: false,
+                                error: "An Error Occurred Deleting the Comments"
+                            });
+                        };
+                        try{
+                            await Post.deleteMany({ user: paramUser });
+                        }catch(error){
+                            console.error(error);
+                            return res.status(500).json({
+                                ok: false,
+                                error: "An Error Occurred Deleting the Posts"
+                            });
+                        };
+                        await User.deleteOne({ username: paramUser });
+                        return res.status(200).json({
+                            message: "User deleted successfully",
+                        });
                     }else{
                         return res.status(403).json({
                             message: "Unauthorized"
