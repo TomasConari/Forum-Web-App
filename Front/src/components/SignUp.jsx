@@ -89,7 +89,7 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
                     name="password"
                     type="password" 
                     value={signUser.password} 
-                    onChange={(event) => setSignUp('password', event)} 
+                    onChange={setSignUp} 
                 />
                 <label>Password</label>
             </div>

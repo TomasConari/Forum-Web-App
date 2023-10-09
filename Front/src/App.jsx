@@ -3,6 +3,7 @@ import './App.css';
 import { Dashboard } from './components/Dashboard';
 import { LoginComponent  } from './components/LoginComponent ';
 import { SignUp } from './components/SignUp';
+import jwt_decode from 'jwt-decode';
 
 const App = () => {
 
@@ -19,8 +20,17 @@ const App = () => {
     'Content-type': 'application/json',
     'auth-token': ''
   });
+  const [userInfo, setUserInfo] = useState({
+    id: "",
+    name: "",
+    lastname: "",
+    username: "",
+    role: ""
+  });
 
   //Functions
+
+  console.log(userInfo)
 
   const logout = () => {
     localStorage.removeItem('auth-token');
@@ -28,6 +38,13 @@ const App = () => {
       ...prevHeader,
       'auth-token': ''
     }));
+    setUserInfo({
+      id: "",
+      name: "",
+      lastname: "",
+      username: "",
+      role: ""
+    });
     setAuth(false);
   };
 
@@ -35,13 +52,14 @@ const App = () => {
 
   useEffect(() => {
     const authToken = localStorage.getItem('auth-token');
-    if (authToken) {
+    if(authToken){
       setHeader((prevHeader) => ({
         ...prevHeader,
         'auth-token': authToken
       }));
+      setUserInfo(jwt_decode(authToken));
       setAuth(true);
-    }
+    };
   }, []);
 
   //return
@@ -53,7 +71,8 @@ const App = () => {
         <br />
         <form className='login'>
           {login ? 
-            <LoginComponent 
+            <LoginComponent
+              setUserInfoProp={setUserInfo}
               hostProp={host} 
               authProp={setAuth} 
               errorProp={setError} 
@@ -82,7 +101,7 @@ const App = () => {
     return(
       <div>
         <button onClick={logout}>Logout</button>
-        <Dashboard host={host} header={header} />
+        <Dashboard localUser={userInfo} host={host} header={header} />
       </div>
     );
   };

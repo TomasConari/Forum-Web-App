@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Post } from "./post";
+import { Post } from "./Post";
 
-export const Dashboard = ({ host, header }) => {
+export const Dashboard = ({ host, header, localUser }) => {
 
     //States
 
     const [postResponse, setPostResponse] = useState("");
+    const [createPostDeploy, setCreatePostDeploy] = useState(false);
     const [allPosts, setallPosts] = useState([]);
     const [post, setPost] = useState({
         title: "",
@@ -33,6 +34,7 @@ export const Dashboard = ({ host, header }) => {
                 allPostsCall();
                 setPostResponse("Post Created Succesfully");
                 setTimeout(() => setPostResponse(""), 4000);
+                setCreatePostDeploy(false);
             }else{
                 setPostResponse("Both Forms must be filled");
                 setTimeout(() => setPostResponse(""), 4000);
@@ -62,21 +64,33 @@ export const Dashboard = ({ host, header }) => {
 
     if(allPosts.length > 0){
         return(
-        <div>
-            <div>
-                <h1>Create Post</h1>
-                <input type="text" placeholder="Tittle" onChange={(event) => savePostForm('title', event)} />
-                <input type="text" placeholder="Text" onChange={(event) => savePostForm('text', event)} />
-                <button onClick={createPost}>Post It</button>
+            <>
+                {!createPostDeploy && <button onClick={() => setCreatePostDeploy(!createPostDeploy)}>New Post +</button>}
+                {createPostDeploy && <div>
+                    <h1>Create Post</h1>
+                    <button onClick={() => setCreatePostDeploy(!createPostDeploy)}>X</button>
+                    <input type="text" placeholder="Tittle" onChange={(event) => savePostForm('title', event)} />
+                    <input type="text" placeholder="Text" onChange={(event) => savePostForm('text', event)} />
+                    <button onClick={createPost}>Post It</button>
+                </div>}
                 {postResponse && <p>{postResponse}</p>}
-            </div>
-            <br />
-            <div>
-                {allPosts.map((el) => (
-                <Post key={el["_id"]} title={el.title} text={el.text} user={el.user} />
-                ))}
-            </div>
-        </div>
+                <br />
+                <div>
+                    {allPosts.map((el) => (
+                        <Post 
+                            hostProp={host} 
+                            headerProp={header} 
+                            localUser={localUser} 
+                            user={el.user} 
+                            title={el.title} 
+                            text={el.text} 
+                            id={el["_id"]} 
+                            key={el["_id"]} 
+                            postReCall={allPostsCall}
+                        />
+                    ))}
+                </div>
+            </>
         );
     }else{
         return(

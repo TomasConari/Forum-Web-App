@@ -1,6 +1,7 @@
 import { useState } from "react";
+import jwt_decode from 'jwt-decode';
 
-export const LoginComponent  = ({ hostProp, headerProp, setHeaderProp, authProp, errorProp }) => {
+export const LoginComponent  = ({ setUserInfoProp, hostProp, headerProp, setHeaderProp, authProp, errorProp }) => {
 
     const [user, setUser] = useState({
         username: '',
@@ -34,6 +35,7 @@ export const LoginComponent  = ({ hostProp, headerProp, setHeaderProp, authProp,
                 });
                 authProp(true);
                 localStorage.setItem('auth-token', responseJson.token);
+                setUserInfoProp(jwt_decode(responseJson.token));
             }else if(response.status === 401) {
                 setUser((prevUser) => {
                     const newUser = { ...prevUser };
