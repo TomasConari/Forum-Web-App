@@ -54,6 +54,7 @@ export const FormToEdit = ({ headerProp, hostProp, id, user, eraseQuote, setMess
     
     return(
         <>
+            <button onClick={() => setFormDeployProp(false)}>X</button>
             <div className="user-box">
                 <input 
                     type="text"

@@ -29,8 +29,6 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, p
         };
     };
 
-    console.log(createCommentDeploy)
-
     useEffect(() => {
         allCommentsCall();
     }, []);
@@ -40,13 +38,6 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, p
             <h2>{user}</h2>
             <h3>{title}</h3>
             <p>{text}</p>
-            <button 
-                onClick={() => {
-                    setCommentDeploy(!commentDeploy);
-                    setFormDeploy(false);
-                    setDeleteDeploy(false);
-                }}>Comments
-            </button>
             {((user === localUser.username) || (localUser.role === "admin")) &&
                 <div>
                     <button
@@ -64,57 +55,6 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, p
                                 setDeleteDeploy(false);
                             }}>Edit
                         </button>}
-                    {commentDeploy && (
-                        <>
-                            <button onClick={() => setCommentDeploy(false)}>X</button>
-                            <p>{allCommentMessage}</p>
-                            {createCommentDeploy &&
-                                <FormToCreate 
-                                    id={id}
-                                    createQuote="Comment"
-                                    hostProp={hostProp}
-                                    localUsername={user}
-                                    headerProp={headerProp}
-                                    reCall={allCommentsCall}
-                                    setMessageProp={setAllCommentMessage}
-                                    setDeploy={setCreateCommentDeploy}
-                                />
-                            }
-                            {allComments.length > 0 ? (
-                                <>
-                                    <button 
-                                        onClick={() => {
-                                            setCreateCommentDeploy(!createCommentDeploy);
-                                        }}>New Comment
-                                    </button>
-                                    {allComments.map((el) => (
-                                    <div key={el._id}>
-                                        <Comment
-                                            id={el._id}
-                                            user={el.user}
-                                            title={el.title}
-                                            text={el.text}
-                                            localUser={localUser}
-                                            headerProp={headerProp}
-                                            hostProp={hostProp}
-                                            reCallComments={allCommentsCall}
-                                            setAllMessages={setAllCommentMessage}
-                                        />
-                                    </div>
-                                    ))}
-                                </>
-                            ) : (
-                            <>
-                                <p>This Post Dont have any Comments</p>
-                                <button 
-                                    onClick={() => {
-                                        setCreateCommentDeploy(!createCommentDeploy);
-                                    }}>New Comment
-                                </button>
-                            </>
-                            )}
-                        </>
-                    )}
                     {deleteDeploy && 
                         <Delete 
                             id={id}
@@ -141,6 +81,59 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, p
                     {postMessage && <a id='error'><span /><span /><span /><span />{postMessage}</a>}
                 </div>
             }
+            <button 
+                onClick={() => {
+                    setCommentDeploy(!commentDeploy);
+                    setFormDeploy(false);
+                    setDeleteDeploy(false);
+                }}>Comments
+            </button>
+            {commentDeploy && (
+                <>
+                    <button onClick={() => setCommentDeploy(false)}>X</button>
+                    <p>{allCommentMessage}</p>
+                    <button 
+                                onClick={() => {
+                                    setCreateCommentDeploy(!createCommentDeploy);
+                                }}>New Comment
+                            </button>
+                    {createCommentDeploy &&
+                        <FormToCreate 
+                            id={id}
+                            createQuote="Comment"
+                            hostProp={hostProp}
+                            localUsername={user}
+                            headerProp={headerProp}
+                            reCall={allCommentsCall}
+                            setMessageProp={setAllCommentMessage}
+                            setDeploy={setCreateCommentDeploy}
+                        />
+                    }
+                    {allComments.length > 0 ? (
+                         <>
+                            {allComments.map((el) => (
+                            <div key={el._id}>
+                                <Comment
+                                    id={el._id}
+                                    user={el.user}
+                                    title={el.title}
+                                    text={el.text}
+                                    localUser={localUser}
+                                    headerProp={headerProp}
+                                    hostProp={hostProp}
+                                    reCallComments={allCommentsCall}
+                                    setAllMessages={setAllCommentMessage}
+                                />
+                            </div>
+                            ))}
+                        </>
+                    ) : (
+                        <>
+                            <p>This Post Dont have any Comments</p>
+                        </>
+                    )}
+                </>
+            )}
             <br />
         </div>
     );
