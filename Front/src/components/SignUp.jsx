@@ -9,33 +9,32 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
         password: ''
     });
 
-    const setSignUp = (type, event) => {
-        const word = event.target.value;
+    const setSignUp = (event) => {
         setSignUser((prevUser) => ({
             ...prevUser,
-            [type]: word
+            [event.target.name]: event.target.value
         }));
     };
 
     const signUp = async () => {
-        if (!signUser.name || !signUser.lastname || !signUser.username || !signUser.password) {
+        if(!signUser.name || !signUser.lastname || !signUser.username || !signUser.password){
             errorProp("Please fill in all fields");
             setTimeout(() => errorProp(""), 6000);
             return;
         };
-        if (signUser.password.length < 6) {
+        if(signUser.password.length < 6){
             errorProp("Password should be at least 6 characters long");
             setTimeout(() => errorProp(""), 6000);
             return;
         };
-        try {
+        try{
             const response = await fetch(`${hostProp}/user/create`, {
                 method: 'POST',
                 headers: headerProp,
                 body: JSON.stringify(signUser)
             });
-            try {
-                if(response.status === 201) {
+            try{
+                if(response.status === 201){
                     setSignUser({
                         name: '',
                         lastname: '',
@@ -46,11 +45,11 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
                     errorProp(`User created, please Log In`);
                     setTimeout(() => errorProp(""), 6000);
                 };
-            } catch (error) {
+            }catch(error){
                 errorProp("User Created, message error");
                 setTimeout(() => errorProp(""), 6000);
             };
-        } catch (error) {
+        }catch(error){
             errorProp("An error occurred");
             setTimeout(() => errorProp(""), 6000);
         };
@@ -59,19 +58,42 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
     return(
         <>
             <div className="user-box">
-                <input input type="text" value={signUser.name} onChange={(event) => setSignUp('name', event)} />
+                <input 
+                    name="name" 
+                    type="text" 
+                    autoComplete="off"
+                    value={signUser.name} 
+                    onChange={setSignUp} 
+                />
                 <label>Name</label>
             </div>
             <div className="user-box">
-                <input input type="text" value={signUser.lastname} onChange={(event) => setSignUp('lastname', event)} />
+                <input
+                    name="lastname"
+                    type="text" 
+                    autoComplete="off"
+                    value={signUser.lastname} 
+                    onChange={setSignUp}
+                />
                 <label>Lastname</label>
             </div>
             <div className="user-box">
-                <input input type="text" value={signUser.username} onChange={(event) => setSignUp('username', event)} />
+                <input 
+                    name="username"
+                    type="text"
+                    autoComplete="off"
+                    value={signUser.username} 
+                    onChange={setSignUp} 
+                />
                 <label>Username</label>
             </div>
             <div className="user-box">
-                <input input type="password" value={signUser.password} onChange={(event) => setSignUp('password', event)} />
+                <input 
+                    name="password"
+                    type="password" 
+                    value={signUser.password} 
+                    onChange={setSignUp} 
+                />
                 <label>Password</label>
             </div>
             <a href="#" onClick={signUp}>

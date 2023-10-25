@@ -1,118 +1,145 @@
-import { Post } from "../models/post.model.js";
-import { User } from "../models/user.model.js";
 import { Comment } from "../models/comment.model.js";
 
 export const commentControllers = {
     create: async (req, res) => {
-        const { id, paramsUsername } = req.params;
-        const { text } = req.body;
-        const { userUsername } = req.user;
         try{
-            const newComment = new Comment({
-                user: userUsername,
-                text,
-                from: id
-            });
-            const savedComment = await newComment.save();
-            const userToUpdate = await User.findOne({ username: paramsUsername });
-            const postToUpdate = await Post.findById(id);
-            if(userToUpdate && postToUpdate){
-                const postIndex = userToUpdate.posts.findIndex(post => post._id.equals(postToUpdate._id));
-                if(postIndex !== -1){
-                    userToUpdate.posts[postIndex].comments.push(savedComment);
-                    await userToUpdate.save();
-                    postToUpdate.comments.push(savedComment);
-                    await postToUpdate.save();
-                    res.status(201).json({
-                        message: 'Comment created and added to post and user',
-                        comment: savedComment
-                    });
-                }else{
-                    res.status(404).json({
-                        message: 'Post not found in user posts'
-                    });
+            const { id } = req.params;
+            const { title, text } = req.body;
+            const { username: localUser } = req.user;
+            try{
+                const newComment = {
+                    user: localUser,
+                    title,
+                    text,
+                    from: id
                 };
-            }else{
-                res.status(404).json({
-                    message: 'User or post not found'
+                await Comment.create(newComment);
+                return res.status(201).json({
+                    ok: true,
+                    message: "Comment Created",
+                    data: newComment
+                });
+            }catch(error){
+                console.error(error);
+                return res.status(500).json({
+                    ok: false,
+                    error: "Error Creating Comment"
                 });
             };
         }catch(error){
-            res.status(500).json({
-                message: 'An error occurred while creating and adding the comment',
-                error: error.message
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                error: "Error Getting Body Info"
             });
         };
     },
     update: async (req, res) => {
-        const { newText } = req.body;
-        const { id } = req.params;
-        const { username } = req.user;
-        try {
-            const commentToUpdate = await Comment.findById(id);
-            if(!commentToUpdate){
-                return res.status(404).json({
-                    message: 'Comment not found'
-                });
+        try{
+            const { id } = req.params;
+            const { commentUser, title, text } = req.body;
+            const { username: localUser, role: localRole } = req.user;
+            const newData = {
+                title,
+                text
             };
-            if (commentToUpdate.user !== username) {
+            try{
+                if((localUser === commentUser) || (localRole === "admin")){
+                    try{
+                        const updatedComment = await Comment.findOneAndUpdate({ _id: id }, newData, { new: true });
+                        if(updatedComment === null){
+                            return res.status(500).json({
+                                ok: false,
+                                message: "Could Not Find and Update the Comment in Db Side" 
+                            });
+                        };
+                        return res.status(200).json({
+                            ok: true,
+                            message: "Comment Updated",
+                            data: updatedComment
+                        });
+                    }catch(error){
+                        console.log(error);
+                        return res.status(500).json({
+                            ok: false,
+                            message: "An Error Occurred During the Update Api Sided"
+                        });
+                    };
+                }else{
+                    throw new Error;
+                };
+            }catch(error){
+                console.log(error);
                 return res.status(403).json({
-                    message: 'You do not have permission to update this comment'
+                    ok: false,
+                    message: "Action Denied"
                 });
             };
-            const updatedComment = await Comment.findByIdAndUpdate(id, { text: newText }, { new: true });
-            await User.updateMany(
-                { 'posts.comments._id': id },
-                { $set: { 'posts.$[].comments.$[inner].text': newText } },
-                { arrayFilters: [{ 'inner._id': id }] }
-            );
-            await Post.updateMany(
-                { 'comments._id': id },
-                { $set: { 'comments.$.text': newText } }
-            );
-            res.status(200).json({
-                message: 'Comment updated successfully',
-                updatedComment
-            });
         }catch(error){
-            res.status(500).json({
-                message: 'An error occurred while updating the comment',
-                error: error.message
+            console.log(error);
+            return res.status(500).json({
+                ok: false,
+                message: "An Error Ocurred Getting the Body of the Request"
             });
         };
     },
     delete: async (req, res) => {
-        const { id } = req.params;
-        try {
-            const deletedComment = await Comment.findByIdAndDelete(id);
-            if (!deletedComment) {
-                return res.status(404).json({ message: "Comment not found" });
-            };
-            const userToUpdate = await User.findOne({ username: deletedComment.user });
-            if (userToUpdate) {
-                userToUpdate.posts.forEach((post) => {
-                    post.comments = post.comments.filter((comment) => !comment.equals(deletedComment._id));
+        try{
+            const { id } = req.params;
+            try{
+                const deletedComment = await Comment.findOneAndDelete({ _id: id });
+                if (deletedComment === null) {
+                    return res.status(404).json({
+                        ok: false,
+                        message: "Comment not found"
+                    });
+                };
+                return res.status(200).json({
+                    ok: true,
+                    message: "Comment Deleted"
                 });
-                await userToUpdate.save();
-            }
-            await Post.updateMany(
-                { 'comments._id': deletedComment._id },
-                { $pull: { comments: { _id: deletedComment._id } } }
-            );
-            res.status(200).json({ message: "Comment deleted successfully" });
-        } catch (error) {
-            res.status(500).json({ message: "An error occurred during the delete" });
-        }
+            }catch(error){
+                return res.status(500).json({
+                    ok: false,
+                    message: "An Error Occurred During the Delete Api Sided"
+                });
+            };
+        }catch(error){
+            console.log(error);
+            return res.status(500).json({
+                ok: false,
+                message: "An Error Occurred Getting the Request Params"
+            });
+        };
     },
     getAll: async (req, res) => {
         try{
             const allComments = await Comment.find();
-            res.status(200).json({ 
+            return res.status(200).json({
+                ok: true,
                 data: allComments
             });
         }catch(error){
-            res.status(500).json({
-                message: "An error occurred while retrieving the comments"
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                message: "An Error Occurred While Retrieving the Comments"
+            });
+        };
+    },
+    getFrom: async (req, res) => {
+        try{
+            const { id } = req.params;
+            const allComments = await Comment.find({ from: id });
+            return res.status(200).json({
+                ok: true,
+                data: allComments
+            });
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                message: "An Error Occurred While Retrieving the Comments"
             });
         };
     },
@@ -120,12 +147,15 @@ export const commentControllers = {
         const data = req.body;
         try{
             const comment = await Comment.findOne(data);
-            res.status(200).json({ 
+            return res.status(200).json({
+                ok: true,
                 data: comment
             });
         }catch(error){
-            res.status(500).json({
-                message: "An error occurred while retrieving the comment"
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                message: "An Error Occurred While Retrieving the Comment"
             });
         };
     }  

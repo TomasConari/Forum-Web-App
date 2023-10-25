@@ -6,108 +6,320 @@ import Jwt from "jsonwebtoken";
 
 export const userControllers = {
     create: async (req, res) => {
-        const { name, lastname, username, password } = req.body;
-        try {
-            const hash = await bcrypt.hash(password, 10);
-            const newUser = {
-                name,
-                lastname,
-                username,
-                password: hash
+        try{
+            const { name, lastname, username, password } = req.body;
+            try{
+                const hash = await bcrypt.hash(password, 10);
+                const newUser = {
+                    name,
+                    lastname,
+                    username,
+                    password: hash
+                };
+                await User.create(newUser);
+                return res.status(201).json({
+                    ok: true,
+                    message: "User Created",
+                    data: newUser
+                });
+            }catch(error){
+                console.error(error);
+                return res.status(500).json({
+                    ok: false,
+                    error: "Error Creating User"
+                });
             };
-            await User.create(newUser);
-            res.status(201).json({
-                ok: true,
-                data: newUser
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                error: "Missing Fields"
             });
-        } catch (error) {
-            throw new Error;
         };
     },
     login: async (req, res) => {
-        const { username, password } = req.body;
-        try {
-          const user = await User.findOne({ username: username });
-          if (!user) {
-            return res.status(401).json({
-              message: "User not found"
+        try{
+            const { username, password } = req.body;
+            try{
+                const user = await User.findOne({ username: username });
+                if(!user){
+                    return res.status(401).json({
+                        ok: false,
+                        message: "User not found"
+                    });
+                };
+                const hash = user.password;
+                try{
+                    bcrypt.compare(password, hash, (err, result) => {
+                        if(result){
+                            try{
+                                const { _id, name, lastname, username, role } = user;
+                                const payload = {
+                                    id: _id,
+                                    name,
+                                    lastname,
+                                    username,
+                                    role
+                                };
+                                const token = Jwt.sign(payload, "secretKey");
+                                return res.status(200).json({
+                                    ok: true,
+                                    token
+                                });
+                            }catch(error){
+                                console.error(error);
+                                return res.status(500).json({
+                                    ok: false,
+                                    message: "Error Loading The Payload"
+                                });
+                            };
+                        }else{
+                            return res.status(401).json({
+                                ok: false,
+                                message: "Incorrect Password"
+                            });
+                        };
+                    });
+                }catch(error){
+                    console.error(error);
+                    return res.status(500).json({
+                        ok: false,
+                        message: "Error Verifying The Password"
+                    });
+                };
+            }catch(error){
+                console.error(error);
+                return res.status(500).json({
+                    ok: false,
+                    message: "Internal Server Error"
+                });
+            };
+        }catch{
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                message: "Missing Fields"
             });
-          }
-          const hash = user.password;
-          bcrypt.compare(password, hash, (err, result) => {
-            if (result) {
-              const { _id, name, lastname, username } = user;
-              const payload = {
-                id: _id,
-                name,
-                lastname,
-                username
-              };
-              const token = Jwt.sign(payload, "secretKey");
-              res.status(200).json({
-                token
-              });
-            } else {
-              res.status(401).json({
-                message: "Incorrect Password"
-              });
-            }
-          });
-        } catch (error) {
-          console.error(error);
-          res.status(500).json({
-            message: "Internal Server Error"
-          });
-        }
+        };
     },
     update: async (req, res) => {
-        const { username: userUsername, role} = req.user;
-        const { username: paramsUsername } = req.params;
-        const newData = req.body;
-        if((userUsername === paramsUsername) || (role === "admin")){
-            try {
-                const updatedUser = await User.findOneAndUpdate({ username: paramsUsername }, newData, { new: true });
-                if (updatedUser === null) {
+        try{
+            const { username: localUser, role: localRole} = req.user;
+            const { username: paramUser } = req.params;
+            const { 
+                currentPassword: bodyCurrentPassword, 
+                newPassword: bodyNewPassword, 
+                name: bodyName, 
+                lastname: bodyLastname, 
+                username: bodyUser 
+            } = req.body;
+            const newHash = await bcrypt.hash(bodyNewPassword, 10);
+            const newData = {
+                name: bodyName,
+                lastname: bodyLastname,
+                username: bodyUser,
+                password: newHash
+            };
+            if(localUser === paramUser){
+                try{
+                    const user = await User.findOne({ username: paramUser });
+                    if(!user){
+                        return res.status(401).json({
+                            ok: false,
+                            message: "User not found"
+                        });
+                    };
+                    const hash = user.password;
+                    try{
+                        bcrypt.compare(bodyCurrentPassword, hash, async (err, result) => {
+                            if(result){
+                                try{
+                                    const updatedUser = await User.findOneAndUpdate({ username: paramUser }, newData, { new: true });
+                                    const updatePosts = await Post.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                                    const updateComments = await Comment.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                                    if(!(updatedUser === null) && ((updatePosts === null) && (updateComments === null))){
+                                        return res.status(500).json({
+                                            ok: false,
+                                            message: "Could not Find and Update the User"
+                                        });
+                                    }else{
+                                        const { _id, name, lastname, username, role } = updatedUser;
+                                        const payload = {
+                                            id: _id,
+                                            name,
+                                            lastname,
+                                            username,
+                                            role
+                                        };
+                                        const token = Jwt.sign(payload, "secretKey");
+                                        return res.status(200).json({
+                                            ok: true,
+                                            token,
+                                            updatedUser
+                                        });
+                                    };
+                                }catch(error){
+                                    console.error(error);
+                                    return res.status(500).json({
+                                        ok: false,
+                                        message: "Error Updating the User"
+                                    });
+                                };
+                            }else{
+                                return res.status(401).json({
+                                    ok: false,
+                                    message: "Incorrect Password"
+                                });
+                            };
+                        });
+                    }catch(error){
+                        console.error(error);
+                        return res.status(500).json({
+                            ok: false,
+                            message: "Error Verifying The Password"
+                        });
+                    };
+                }catch(error){
+                    console.error(error);
                     res.status(500).json({
-                        message: "Could not find and update the user"
+                        ok: false,
+                        message: "An Error Occurred During the Update"
                     });
-                } else {
+                };
+            }else if(localRole === "admin"){
+                const updatedUser = await User.findOneAndUpdate({ username: paramUser }, newData, { new: true });
+                const updatePosts = await Post.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                const updateComments = await Comment.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                if(!(updatedUser === null) && ((updatePosts === null) && (updateComments === null))){
+                    res.status(500).json({
+                        message: "Could not Find and Update the User"
+                    });
+                }else{
                     res.status(200).json({
                         message: "User Updated",
                         data: updatedUser
                     });
                 };
-            } catch (error) {
-                res.status(500).json({
-                    message: "An error occurred during the update"
+            }else{
+                res.status(403).json({ 
+                    message: "Unauthorized",
+                    role: localRole
                 });
             };
-        }else{
-            res.status(403).json({ 
-                message: "Unauthorized",
-                role: role
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                error: "Missing Fields"
             });
         };
     },
     delete: async (req, res) => {
-        const { username: userUsername, role} = req.user;
-        const { username: paramsUsername } = req.params;
-        if((userUsername === paramsUsername) || (role === "admin")){
+        try{
+            const { username: localUser, role: localRole } = req.user;
+            const { username : paramUser } = req.params;
+            const user = await User.findOne({ username: paramUser });
+            const posts = await Post.find({ user: paramUser });
+            const postIds = posts.map((post) => post._id);
+            const idsArray = Object.values(postIds);
+            const length = idsArray.length;
             try{
-                await User.deleteOne({username:paramsUsername});
-                await Post.deleteMany({ user: userUsername });
-                await Comment.deleteMany({ user: userUsername });
-                res.status(200).json({ 
-                message: "User deleted successfully",
-                });
-            }catch (error){
-                res.status(500).json({ 
-                    message: "An error occurred during the delete" 
+                const hash = user.password;
+                const { password } = req.body;
+                try{
+                    if(localUser === paramUser){
+                        try{
+                            bcrypt.compare(password, hash, async (err, result) => {
+                                if(result){
+                                    try{
+                                        for(let i = 0; i < length; i += 1){
+                                            await Comment.deleteMany({ from: idsArray[i] });
+                                        };
+                                        await Comment.deleteMany({ user: localUser });
+                                    }catch(error){
+                                        console.error(error);
+                                        return res.status(500).json({
+                                            ok: false,
+                                            error: "An Error Occurred Deleting the Comments"
+                                        });
+                                    };
+                                    try{
+                                        await Post.deleteMany({ user: paramUser });
+                                    }catch(error){
+                                        console.error(error);
+                                        return res.status(500).json({
+                                            ok: false,
+                                            error: "An Error Occurred Deleting the Posts"
+                                        });
+                                    };
+                                    await User.deleteOne({ username: paramUser });
+                                    return res.status(200).json({
+                                        ok: true,
+                                        message: "User deleted successfully",
+                                    });
+                                }else{
+                                    return res.status(401).json({
+                                        ok: false,
+                                        message: "Incorrect Password"
+                                    });
+                                };
+                            });
+                        }catch(error){
+                            console.error(error);
+                            return res.status(500).json({
+                                message: "An Error Occurred Deleting the User"
+                            });
+                        };
+                    }else if(localRole === "admin"){
+                        try{
+                            for(let i = 0; i < length; i += 1){
+                                await Comment.deleteMany({ from: idsArray[i] });
+                            };
+                            await Comment.deleteMany({ user: localUser });
+                        }catch(error){
+                            console.error(error);
+                            return res.status(500).json({
+                                ok: false,
+                                error: "An Error Occurred Deleting the Comments"
+                            });
+                        };
+                        try{
+                            await Post.deleteMany({ user: paramUser });
+                        }catch(error){
+                            console.error(error);
+                            return res.status(500).json({
+                                ok: false,
+                                error: "An Error Occurred Deleting the Posts"
+                            });
+                        };
+                        await User.deleteOne({ username: paramUser });
+                        return res.status(200).json({
+                            message: "User deleted successfully",
+                        });
+                    }else{
+                        return res.status(403).json({
+                            message: "Unauthorized"
+                        });
+                    };
+                }catch(error){
+                    console.error(error);
+                    return res.status(500).json({
+                        ok: false,
+                        error: "An Error Occurred During The Delete"
+                    });
+                };
+            }catch(error){
+                console.error(error);
+                return res.status(500).json({
+                    ok: false,
+                    error: "Error Getting Body Info"
                 });
             };
-        }else{
-            res.status(403).json({ 
-                message: "Unauthorized" 
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                error: "Error Getting Local User Info"
             });
         };
     },
@@ -119,7 +331,7 @@ export const userControllers = {
             });
         }catch(error){
             res.status(500).json({
-                message: "An error occurred while retrieving workers"
+                message: "An Error Occurred While Retrieving Users"
             });
         };
     },
@@ -132,7 +344,7 @@ export const userControllers = {
             });
         }catch(error){
             res.status(500).json({
-                message: "An error occurred while retrieving the user"
+                message: "An Error Occurred While Searching the User(s)"
             });
         };
     },
@@ -145,8 +357,8 @@ export const userControllers = {
             });
         }catch(error){
             res.status(500).json({
-                message: "An error occurred while retrieving the user"
+                message: "An Error Occurred While Retrieving the User"
             });
         };
     }
-}
+};

@@ -1,92 +1,177 @@
 import { Post } from "../models/post.model.js";
-import { User } from "../models/user.model.js";
 import { Comment } from "../models/comment.model.js";
 
 export const postControllers = {
     create: async (req, res) => {
-        const { title, text } = req.body;
-        const { username } = req.user;
-        try {
-            const newPost = new Post({
-                user: username,
-                title,
-                text,
+        try{
+            const { title, text } = req.body;
+            const { username } = req.user;
+            try{
+                const newPost = new Post({
+                    user: username,
+                    title,
+                    text,
+                });
+                await Post.create(newPost);
+                return res.status(201).json({
+                    ok: true,
+                    message: "Post Created",
+                    post: newPost
+                });
+            }catch(error){
+                console.error(error);
+                return res.status(500).json({
+                    ok: false,
+                    error: "Error Creating Post"
+                });
+            };
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                error: "An Error Ocurred Getting the Body of the Request"
             });
-            const savedPost = await newPost.save();
-            const updatedUser = await User.findOneAndUpdate({username:username},{ $push: { posts: savedPost } }, { new: true });
-            res.status(201).json({
-                message: 'Post created and added to user',
-                post: savedPost,
-                updatedUser
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: 'An error occurred while creating and creating the post',
-                error: error.message
-            });
-        }
+        };
     },
     edit: async (req, res) => {
-        const { title } = req.params;
-        const newData = req.body;
-        try {
-            const updatedPost = await Post.findOneAndUpdate({ title: title }, newData, { new: true });
-            if (updatedPost === null) {
-                return res.status(500).json({ message: "Could not find and update the post" });
-            }
-            const userToUpdate = await User.findOne({ username: updatedPost.user });
-            if (userToUpdate) {
-                const postIndex = userToUpdate.posts.findIndex(postId => postId.equals(updatedPost._id));
-                if (postIndex !== -1) {
-                    userToUpdate.posts[postIndex] = updatedPost;
-                    await userToUpdate.save();
-                }
-            }
-            res.status(200).json({ message: "Post Updated", data: updatedPost });
-        } catch (error) {
-            res.status(500).json({ message: "An error occurred during the update", error: error.message });
+        try{
+            const { id } = req.params;
+            const { username: postUser, title, text } = req.body;
+            const { username: localUser, role: localRole } = req.user;
+            const newData = {
+                title,
+                text
+            };
+            try{
+                if((localUser === postUser) || (localRole === "admin")){
+                    try{
+                        const updatedPost = await Post.findOneAndUpdate({ _id: id }, newData, { new: true });
+                        if(updatedPost === null){
+                            return res.status(500).json({
+                                ok: false,
+                                message: "Could Not Find and Update the Post in Db Side" 
+                            });
+                        };
+                        return res.status(200).json({
+                            ok: true,
+                            message: "Post Updated",
+                            data: updatedPost
+                        });
+                    }catch(error){
+                        console.log(error);
+                        return res.status(500).json({
+                            ok: false,
+                            message: "An Error Occurred During the Update Api Sided"
+                        });
+                    };
+                }else{
+                    throw new Error;
+                };
+            }catch(error){
+                console.log(error);
+                return res.status(403).json({
+                    ok: false,
+                    message: "Action Denied"
+                });
+            };
+        }catch(error){
+            console.log(error);
+            return res.status(500).json({
+                ok: false,
+                message: "An Error Ocurred Getting the Body of the Request"
+            });
         };
     },
     delete: async (req, res) => {
-        const { title } = req.body;
-        try {
-            const deletedPost = await Post.findOneAndDelete({ title: title });
-            if (!deletedPost) {
-                return res.status(404).json({ message: "Post not found" });
-            }
-            const userToUpdate = await User.findOne({ username: deletedPost.user });
-            if (userToUpdate) {
-                userToUpdate.posts = userToUpdate.posts.filter(postId => !postId.equals(deletedPost._id));
-                await userToUpdate.save();
-            }
-            res.status(200).json({ message: "Post deleted successfully" });
-            await Comment.deleteMany({ from: deletedPost._id });
-        } catch (error) {
-            res.status(500).json({ message: "An error occurred during the delete" });
+        try{
+            const { id } = req.params;
+            try{
+                const deletedPost = await Post.findOneAndDelete({ _id: id });
+                const deletedComments = await Comment.deleteMany({ from: id});
+                if((deletedPost === null) || (deletedComments === null)){
+                    return res.status(404).json({
+                        ok: false,
+                        message: "Post not found" 
+                    });
+                };
+                return res.status(200).json({
+                    ok: true,
+                    message: "Post Deleted"
+                });
+            }catch(error){
+                return res.status(500).json({
+                    ok: false,
+                    message: "An Error Occurred During the Delete Api Sided" 
+                });
+            };
+        }catch(error){
+            console.log(error);
+            return res.status(500).json({
+                ok: false,
+                message: "An Error Occurred Getting the Requested Body"
+            });
         };
     },    
     getAll: async (req, res) => {
         try{
             const allPosts = await Post.find();
-            res.status(200).json({ 
+            return res.status(200).json({
+                ok: true,
                 data: allPosts
             });
         }catch(error){
-            res.status(500).json({
-                message: "An error occurred while retrieving posts"
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                message: "An Error Occurred While Retrieving the Posts"
+            });
+        };
+    },
+    getAllByUser: async (req, res) => {
+        try{
+            const { username } = req.body;
+            try{
+                const allPosts = await Post.find({ user: username });
+                return res.status(200).json({
+                    ok: true,
+                    data: allPosts
+                });
+            }catch(error){
+                console.error(error);
+                return res.status(500).json({
+                    ok: false,
+                    message: "An Error Occurred While Retrieving the Posts"
+                });
+            };
+        }catch(error){
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                message: "An Error Occurred Getting the Requested Body"
             });
         };
     },
     getOne: async (req, res) => {
-        const data = req.body;
         try{
-            const post = await Post.findOne(data);
-            res.status(200).json({ 
-                data: post
-            });
+            const { title } = req.body;
+            try{
+                const post = await Post.findOne({ title: title });
+                return res.status(200).json({
+                    ok: true,
+                    data: post
+                });
+            }catch(error){
+                console.error(error);
+                return res.status(500).json({
+                    ok: false,
+                    message: "An Error Occurred While Retrieving the Post"
+                });
+            };
         }catch(error){
-            res.status(500).json({
-                message: "An error occurred while retrieving the post"
+            console.error(error);
+            return res.status(500).json({
+                ok: false,
+                message: "An Error Occurred Getting the Requested Body"
             });
         };
     }
