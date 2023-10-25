@@ -93,10 +93,10 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, p
                     <button onClick={() => setCommentDeploy(false)}>X</button>
                     <p>{allCommentMessage}</p>
                     <button 
-                                onClick={() => {
-                                    setCreateCommentDeploy(!createCommentDeploy);
-                                }}>New Comment
-                            </button>
+                        onClick={() => {
+                            setCreateCommentDeploy(!createCommentDeploy);
+                        }}>New Comment
+                    </button>
                     {createCommentDeploy &&
                         <FormToCreate 
                             id={id}
