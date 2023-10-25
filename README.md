@@ -30,7 +30,6 @@ Project Info:
     - Despite the project has been delivered and evaluated by the bootcamp, 
     I will continue to develop it and implement improvements.
 
-develop=======
 Last Changes:
 
     -Minor Login and SignUp Functionality Fixes.
