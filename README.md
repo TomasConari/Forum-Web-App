@@ -36,7 +36,6 @@ Last Changes:
     -Updated Login UI.
     -Login and Signup Are Now Individual Components.
         
-master
 My Links:
 
     -Linkedin: https://www.linkedin.com/in/tomascontreras1307/
