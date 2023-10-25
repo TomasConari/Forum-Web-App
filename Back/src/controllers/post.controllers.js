@@ -1,4 +1,5 @@
 import { Post } from "../models/post.model.js";
+import { Comment } from "../models/comment.model.js";
 
 export const postControllers = {
     create: async (req, res) => {
@@ -35,7 +36,7 @@ export const postControllers = {
     edit: async (req, res) => {
         try{
             const { id } = req.params;
-            const { postUser, title, text } = req.body;
+            const { username: postUser, title, text } = req.body;
             const { username: localUser, role: localRole } = req.user;
             const newData = {
                 title,
@@ -83,36 +84,24 @@ export const postControllers = {
     },
     delete: async (req, res) => {
         try{
-            const { id, postUser } = req.body;
-            const { username: localUser, role: localRole } = req.user;
+            const { id } = req.params;
             try{
-                if((localUser === postUser) || (localRole === "admin")){
-                    try{
-                        const deletedPost = await Post.findOneAndDelete({ _id: id });
-                        if(deletedPost === null){
-                            return res.status(404).json({
-                                ok: false,
-                                message: "Post not found" 
-                            });
-                        };
-                        return res.status(200).json({
-                            ok: true,
-                            message: "Post Deleted"
-                        });
-                    }catch(error){
-                        return res.status(500).json({
-                            ok: false,
-                            message: "An Error Occurred During the Delete Api Sided" 
-                        });
-                    };
-                }else{
-                    throw new Error;
+                const deletedPost = await Post.findOneAndDelete({ _id: id });
+                const deletedComments = await Comment.deleteMany({ from: id});
+                if((deletedPost === null) || (deletedComments === null)){
+                    return res.status(404).json({
+                        ok: false,
+                        message: "Post not found" 
+                    });
                 };
+                return res.status(200).json({
+                    ok: true,
+                    message: "Post Deleted"
+                });
             }catch(error){
-                console.log(error);
-                return res.status(403).json({
+                return res.status(500).json({
                     ok: false,
-                    message: "Action Denied"
+                    message: "An Error Occurred During the Delete Api Sided" 
                 });
             };
         }catch(error){
