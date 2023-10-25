@@ -30,13 +30,6 @@ Project Info:
     - Despite the project has been delivered and evaluated by the bootcamp, 
     I will continue to develop it and implement improvements.
 
-Last Changes:
-
-    1.1.1 Version:
-        -User Controllers and Routes Updated.
-        -Post Controllers and Routes Updated.
-        -Comment Controllers and Routes Updated.
-
 My Links:
 
     -Linkedin: https://www.linkedin.com/in/tomascontreras1307/
