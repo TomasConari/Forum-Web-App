@@ -30,8 +30,6 @@ const App = () => {
 
   //Functions
 
-  console.log(userInfo)
-
   const logout = () => {
     localStorage.removeItem('auth-token');
     setHeader((prevHeader) => ({

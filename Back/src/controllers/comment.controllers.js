@@ -85,43 +85,30 @@ export const commentControllers = {
     },
     delete: async (req, res) => {
         try{
-            const { id, commentUser } = req.body;
-            const { username: localUser, role: localRole } = req.user;
+            const { id } = req.params;
             try{
-                if((localUser === commentUser) || (localRole === "admin")){
-                    try{
-                        const deletedComment = await Comment.findOneAndDelete({ _id: id });
-                        if (deletedComment === null) {
-                            return res.status(404).json({
-                                ok: false,
-                                message: "Comment not found"
-                            });
-                        };
-                        return res.status(200).json({
-                            ok: true,
-                            message: "Comment Deleted"
-                        });
-                    }catch(error){
-                        return res.status(500).json({
-                            ok: false,
-                            message: "An Error Occurred During the Delete Api Sided"
-                        });
-                    };
-                }else{
-                    throw new Error;
+                const deletedComment = await Comment.findOneAndDelete({ _id: id });
+                if (deletedComment === null) {
+                    return res.status(404).json({
+                        ok: false,
+                        message: "Comment not found"
+                    });
                 };
+                return res.status(200).json({
+                    ok: true,
+                    message: "Comment Deleted"
+                });
             }catch(error){
-                console.log(error);
-                return res.status(403).json({
+                return res.status(500).json({
                     ok: false,
-                    message: "Action Denied"
+                    message: "An Error Occurred During the Delete Api Sided"
                 });
             };
         }catch(error){
             console.log(error);
             return res.status(500).json({
                 ok: false,
-                message: "An Error Occurred Getting the Requested Body"
+                message: "An Error Occurred Getting the Request Params"
             });
         };
     },

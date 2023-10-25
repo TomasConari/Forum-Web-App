@@ -1,97 +1,143 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormToEdit } from "./FormToEdit";
+import { Comment } from "./Comments";
+import { Delete } from "./Delete";
+import { FormToCreate } from "./FormToCreate";
 
 export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, postReCall }) => {
 
     const [formDeploy, setFormDeploy] = useState(false);
     const [deleteDeploy, setDeleteDeploy] = useState(false);
+    const [commentDeploy, setCommentDeploy] = useState(false);
+    const [createCommentDeploy, setCreateCommentDeploy] = useState(false);
     const [postMessage, setPostMessage] = useState("");
-    const [updateBody, setUpdateBody] = useState({
-        username: user,
-        title: "",
-        text: ""
-    });
+    const [allComments, setAllComments] = useState([]);
+    const [allCommentMessage, setAllCommentMessage] = useState("");
 
-    const deletePost = async () => {
+    const allCommentsCall = async () => {
         try{
-            const response = await fetch(`${hostProp}/post/delete/${id}`, {
-                method: "DELETE",
-                headers: headerProp
+            const rawData = await fetch(`${hostProp}/comments/from/${id}`, {
+            method: "GET",
+            headers: headerProp
             });
-            if(response.ok === false){
-                throw new Error;
-            }else{
-                postReCall();
-                setDeleteDeploy(false);
-                setPostMessage(response.message);
-                setTimeout(() => setPostMessage(""), 6000);
-            };
+            const dataJson = await rawData.json();
+            const dataArr = dataJson.data;
+            setAllComments(dataArr.reverse());
         }catch(error){
-            console.log(error)
-            setPostMessage("Connection Error, Try Again Later");
-            setTimeout(() => setPostMessage(""), 6000);
+            setAllCommentMessage("There was an error getting the Comments");
+            setTimeout(() => setAllCommentMessage(""), 6000);
         };
     };
 
-    const edit = async () => {
-        try{
-            if(updateBody.title.length < 1){
-                setPostMessage("Title can not be Empty");
-                setTimeout(() => setPostMessage(""), 6000);
-                return;
-            };
-            if(updateBody.text.length < 1){
-                setPostMessage("Text can not be Empty");
-                setTimeout(() => setPostMessage(""), 6000);
-                return;
-            };
-            const response = await fetch(`${hostProp}/post/update/${id}`, {
-                method: "PUT",
-                headers: headerProp,
-                body: JSON.stringify(updateBody)
-            });
-            if(response.ok === false){
-                setPostMessage(response.message);
-                setTimeout(() => setPostMessage(""), 6000);
-            }else{
-                setUpdateBody((prevBody) => ({
-                    ...prevBody,
-                    title: "",
-                    text: ""
-                }));
-                postReCall();
-                setFormDeploy(false);
-                setPostMessage(response.message);
-                setTimeout(() => setPostMessage(""), 6000);
-            };
-        }catch(error){
-            console.log(error)
-            setPostMessage("Connection Error, Try Again Later");
-            setTimeout(() => setPostMessage(""), 6000);
-        };
-    };
+    console.log(createCommentDeploy)
 
-    return (
-        <div id={id}>
+    useEffect(() => {
+        allCommentsCall();
+    }, []);
+
+    return(
+        <div>
             <h2>{user}</h2>
             <h3>{title}</h3>
             <p>{text}</p>
+            <button 
+                onClick={() => {
+                    setCommentDeploy(!commentDeploy);
+                    setFormDeploy(false);
+                    setDeleteDeploy(false);
+                }}>Comments
+            </button>
             {((user === localUser.username) || (localUser.role === "admin")) &&
                 <div>
-                    <button onClick={() => setFormDeploy(!formDeploy)}>Edit</button>
-                    <button onClick={() => setDeleteDeploy(!formDeploy)}>Delete Post</button>
-                    {deleteDeploy && 
+                    <button
+                        onClick={() => {
+                            setDeleteDeploy(!deleteDeploy);
+                            setCommentDeploy(false);
+                            setFormDeploy(false);
+                        }}>Delete Post
+                    </button>
+                    {user === localUser.username && 
+                        <button 
+                            onClick={() => {
+                                setFormDeploy(!formDeploy);
+                                setCommentDeploy(false);
+                                setDeleteDeploy(false);
+                            }}>Edit
+                        </button>}
+                    {commentDeploy && (
                         <>
-                            <h3>Are you sure that you want to Delete this Post?</h3>
-                            <button onClick={() => setDeleteDeploy(false)}>Cancel</button>
-                            <button onClick={deletePost}>Delete</button>
+                            <button onClick={() => setCommentDeploy(false)}>X</button>
+                            <p>{allCommentMessage}</p>
+                            {createCommentDeploy &&
+                                <FormToCreate 
+                                    id={id}
+                                    createQuote="Comment"
+                                    hostProp={hostProp}
+                                    localUsername={user}
+                                    headerProp={headerProp}
+                                    reCall={allCommentsCall}
+                                    setMessageProp={setAllCommentMessage}
+                                    setDeploy={setCreateCommentDeploy}
+                                />
+                            }
+                            {allComments.length > 0 ? (
+                                <>
+                                    <button 
+                                        onClick={() => {
+                                            setCreateCommentDeploy(!createCommentDeploy);
+                                        }}>New Comment
+                                    </button>
+                                    {allComments.map((el) => (
+                                    <div key={el._id}>
+                                        <Comment
+                                            id={el._id}
+                                            user={el.user}
+                                            title={el.title}
+                                            text={el.text}
+                                            localUser={localUser}
+                                            headerProp={headerProp}
+                                            hostProp={hostProp}
+                                            reCallComments={allCommentsCall}
+                                            setAllMessages={setAllCommentMessage}
+                                        />
+                                    </div>
+                                    ))}
+                                </>
+                            ) : (
+                            <>
+                                <p>This Post Dont have any Comments</p>
+                                <button 
+                                    onClick={() => {
+                                        setCreateCommentDeploy(!createCommentDeploy);
+                                    }}>New Comment
+                                </button>
+                            </>
+                            )}
                         </>
+                    )}
+                    {deleteDeploy && 
+                        <Delete 
+                            id={id}
+                            eraseQuote="Post"
+                            headerProp={headerProp}
+                            hostProp={hostProp}
+                            setDeleteDeployProp={setDeleteDeploy}
+                            setMessageProp={setPostMessage}
+                            reCall={postReCall}
+                        />
                     }
-                    {formDeploy && <FormToEdit
-                        editProp={edit}
-                        body={updateBody}
-                        setBody={setUpdateBody}
-                    />}
+                    {formDeploy && 
+                        <FormToEdit
+                            headerProp={headerProp}
+                            hostProp={hostProp}
+                            id={id}
+                            user={user}
+                            eraseQuote={"Post"}
+                            setMessageProp={setPostMessage}
+                            reCall={postReCall}
+                            setFormDeployProp={setFormDeploy}
+                        />
+                    }
                     {postMessage && <a id='error'><span /><span /><span /><span />{postMessage}</a>}
                 </div>
             }

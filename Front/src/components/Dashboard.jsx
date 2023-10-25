@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Post } from "./Post";
+import { FormToCreate } from "./FormToCreate";
 
 export const Dashboard = ({ host, header, localUser }) => {
 
@@ -7,42 +8,12 @@ export const Dashboard = ({ host, header, localUser }) => {
 
     const [postResponse, setPostResponse] = useState("");
     const [createPostDeploy, setCreatePostDeploy] = useState(false);
+    const [allPostsOrder, setAllPostsOrder] = useState(false);
     const [allPosts, setallPosts] = useState([]);
-    const [post, setPost] = useState({
-        title: "",
-        text: ""
-    });
+
+    let callError = "no Error";
 
     //Functions
-
-    const savePostForm = (type, event) => {
-        const quote = event.target.value;
-        setPost((prevPost) => ({
-          ...prevPost,
-          [type]: quote
-        }));
-    };
-
-    const createPost = async () => {
-        try{
-            if((post.title.length > 0) && (post.text.length > 0)){
-                const response = await fetch(`${host}/post/create`, {
-                    method: "POST",
-                    headers: header,
-                    body: JSON.stringify(post)
-                });
-                allPostsCall();
-                setPostResponse("Post Created Succesfully");
-                setTimeout(() => setPostResponse(""), 4000);
-                setCreatePostDeploy(false);
-            }else{
-                setPostResponse("Both Forms must be filled");
-                setTimeout(() => setPostResponse(""), 4000);
-            };
-        }catch(error){
-            console.error(error);
-        };
-    };
 
     const allPostsCall = async () => {
         try{
@@ -55,6 +26,17 @@ export const Dashboard = ({ host, header, localUser }) => {
             setallPosts(dataArr.reverse());
         }catch(error){
             console.error("Error fetching Posts:", error);
+            callError = "No Connection";
+        };
+    };
+
+    const invertPostsOrder = () => {
+        if(allPosts.length > 0){
+            setallPosts((prevPosts) => {
+                const reversedPosts = [...prevPosts].reverse();
+                return reversedPosts;
+            });
+            setAllPostsOrder(!allPostsOrder);
         };
     };
 
@@ -65,14 +47,19 @@ export const Dashboard = ({ host, header, localUser }) => {
     if(allPosts.length > 0){
         return(
             <>
-                {!createPostDeploy && <button onClick={() => setCreatePostDeploy(!createPostDeploy)}>New Post +</button>}
-                {createPostDeploy && <div>
-                    <h1>Create Post</h1>
-                    <button onClick={() => setCreatePostDeploy(!createPostDeploy)}>X</button>
-                    <input type="text" placeholder="Tittle" onChange={(event) => savePostForm('title', event)} />
-                    <input type="text" placeholder="Text" onChange={(event) => savePostForm('text', event)} />
-                    <button onClick={createPost}>Post It</button>
-                </div>}
+                <button onClick={() => setCreatePostDeploy(!createPostDeploy)}>New Post</button>
+                <button onClick={invertPostsOrder}>{allPostsOrder? "Showing Oldest Posts First" : "Showing Newest Posts First"}</button>
+                {createPostDeploy && 
+                    <FormToCreate 
+                        createQuote="Post"
+                        hostProp={host}
+                        localUsername={localUser.username}
+                        headerProp={header}
+                        reCall={allPostsCall}
+                        setMessageProp={setPostResponse}
+                        setDeploy={setCreatePostDeploy}
+                    />
+                }
                 {postResponse && <p>{postResponse}</p>}
                 <br />
                 <div>
@@ -92,14 +79,28 @@ export const Dashboard = ({ host, header, localUser }) => {
                 </div>
             </>
         );
+    }else if(callError = "No Connection"){
+        return(
+            <div>
+                <h1>No Internet Connection, Try Again Later</h1>
+            </div>
+        );
     }else{
         return(
             <div>
-                <h2>No Posts available</h2>
-                <h1>Create Post</h1>
-                <input type="text" placeholder="Tittle" onChange={(event) => savePostForm('title', event)} />
-                <input type="text" placeholder="Text" onChange={(event) => savePostForm('text', event)} />
-                <button onClick={createPost}>Post It</button>
+                {!createPostDeploy && <button onClick={() => setCreatePostDeploy(!createPostDeploy)}>New Post</button>}
+                <button onClick={invertPostsOrder}>{allPostsOrder? "Showing Oldest Posts First" : "Showing Newest Posts First"}</button>
+                {createPostDeploy && 
+                    <FormToCreate 
+                        createQuote="Post"
+                        hostProp={host}
+                        localUsername={localUser.username}
+                        headerProp={header}
+                        reCall={allPostsCall}
+                        setMessageProp={setPostResponse}
+                        setDeploy={setCreatePostDeploy}
+                    />
+                }
                 {postResponse && <p>{postResponse}</p>}
             </div>
         );

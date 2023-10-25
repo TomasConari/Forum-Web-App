@@ -60,6 +60,7 @@ export const LoginComponent  = ({ setUserInfoProp, hostProp, headerProp, setHead
                 <input 
                     type="text"
                     name="username"
+                    autoComplete="off"
                     onChange={setUserAndPassword} 
                 />
                 <label>Username</label>

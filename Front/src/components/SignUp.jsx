@@ -61,6 +61,7 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
                 <input 
                     name="name" 
                     type="text" 
+                    autoComplete="off"
                     value={signUser.name} 
                     onChange={setSignUp} 
                 />
@@ -70,6 +71,7 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
                 <input
                     name="lastname"
                     type="text" 
+                    autoComplete="off"
                     value={signUser.lastname} 
                     onChange={setSignUp}
                 />
@@ -79,6 +81,7 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
                 <input 
                     name="username"
                     type="text"
+                    autoComplete="off"
                     value={signUser.username} 
                     onChange={setSignUp} 
                 />
