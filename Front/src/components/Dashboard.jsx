@@ -101,8 +101,8 @@ export const Dashboard = ({ host, header, localUser, window }) => {
             <>
                 <div style={dashboardStyles.header} ><h1 style={ window.width > 200 ? dashboardStyles.title : dashboardStyles.hiddenTitle }>Forum</h1></div>
                 <div style={dashboardStyles.dashboard} >
-                    {!createPostDeploy && <button onClick={() => setCreatePostDeploy(!createPostDeploy)}>New Post</button>}
-                    <button onClick={invertPostsOrder}>{allPostsOrder? "Showing Oldest Posts First" : "Showing Newest Posts First"}</button>
+                    <button onClick={() => setCreatePostDeploy(!createPostDeploy)}>New Post</button>
+                    <h1>There are no Posts</h1>
                     {createPostDeploy && 
                         <FormToCreate 
                             createQuote="Post"

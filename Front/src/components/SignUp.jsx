@@ -9,11 +9,26 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
         password: ""
     });
 
+    const capitalize = (string) => {
+        const words = string.split(" ");
+        const capitalizedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+        return capitalizedWords.join(" ");
+    };
+
     const setSignUp = (event) => {
-        setSignUser((prevUser) => ({
-            ...prevUser,
-            [event.target.name]: event.target.value
-        }));
+        if((event.target.name === ("name")) || (event.target.name === ("lastname"))){
+            if(!/\d/.test(event.target.value)){
+                setSignUser((prevUser) => ({
+                    ...prevUser,
+                    [event.target.name]: capitalize(event.target.value)
+                }));
+            };
+        }else{
+            setSignUser((prevUser) => ({
+                ...prevUser,
+                [event.target.name]: event.target.value
+            }));
+        };
     };
 
     const signUp = async () => {

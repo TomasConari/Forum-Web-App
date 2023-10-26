@@ -156,7 +156,7 @@ html {
   #error:hover{
     color: #f40303;
     font-size: 12px;
-    background-color: #141e30;
+    background-color: rgba(0,0,0,.5);
   }
 
 .comments{
