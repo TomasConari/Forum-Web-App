@@ -3,6 +3,7 @@ import { FormToEdit } from "./FormToEdit";
 import { Comment } from "./Comments";
 import { Delete } from "./Delete";
 import { FormToCreate } from "./FormToCreate";
+import profileImage from "../images/profile.png"
 
 export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, postReCall }) => {
 
@@ -35,7 +36,7 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, p
 
     return(
         <div>
-            <h2>{user}</h2>
+            <h2><img style={{width: "25px", height: "25px", marginTop: "5px", borderRadius: "5px"}} src={profileImage} alt={`${user}'s Profile Picture`} />  {user}</h2>
             <h3>{title}</h3>
             <p>{text}</p>
             {((user === localUser.username) || (localUser.role === "admin")) &&

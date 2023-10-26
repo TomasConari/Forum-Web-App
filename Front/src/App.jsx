@@ -4,6 +4,7 @@ import { Dashboard } from './components/Dashboard';
 import { LoginComponent  } from './components/LoginComponent ';
 import { SignUp } from './components/SignUp';
 import jwt_decode from 'jwt-decode';
+import { UserProfile } from './components/UserProfile';
 
 const App = () => {
 
@@ -27,10 +28,15 @@ const App = () => {
     username: "",
     role: ""
   });
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
 
+  console.log(windowSize.width, windowSize.height)
   //Functions
 
-  const logout = () => {
+  const logOut = () => {
     localStorage.removeItem('auth-token');
     setHeader((prevHeader) => ({
       ...prevHeader,
@@ -49,7 +55,9 @@ const App = () => {
   //Keep Login on re-render
 
   useEffect(() => {
+
     const authToken = localStorage.getItem('auth-token');
+
     if(authToken){
       setHeader((prevHeader) => ({
         ...prevHeader,
@@ -58,6 +66,16 @@ const App = () => {
       setUserInfo(jwt_decode(authToken));
       setAuth(true);
     };
+
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+
   }, []);
 
   //return
@@ -98,8 +116,8 @@ const App = () => {
   }else{
     return(
       <div>
-        <button onClick={logout}>Logout</button>
-        <Dashboard localUser={userInfo} host={host} header={header} />
+        <UserProfile userObject={userInfo} logoutProp={logOut} window={windowSize} />
+        <Dashboard localUser={userInfo} host={host} header={header} window={windowSize} />
       </div>
     );
   };

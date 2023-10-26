@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Post } from "./Post";
 import { FormToCreate } from "./FormToCreate";
+import { dashboardStyles } from "../styles/dashboardStyles";
 
-export const Dashboard = ({ host, header, localUser }) => {
-
-    //States
+export const Dashboard = ({ host, header, localUser, window }) => {
 
     const [postResponse, setPostResponse] = useState("");
     const [createPostDeploy, setCreatePostDeploy] = useState(false);
@@ -12,8 +11,6 @@ export const Dashboard = ({ host, header, localUser }) => {
     const [allPosts, setallPosts] = useState([]);
 
     let callError = "no Error";
-
-    //Functions
 
     const allPostsCall = async () => {
         try{
@@ -47,35 +44,38 @@ export const Dashboard = ({ host, header, localUser }) => {
     if(allPosts.length > 0){
         return(
             <>
-                <button onClick={() => setCreatePostDeploy(!createPostDeploy)}>New Post</button>
-                <button onClick={invertPostsOrder}>{allPostsOrder? "Showing Oldest Posts First" : "Showing Newest Posts First"}</button>
-                {createPostDeploy && 
-                    <FormToCreate 
-                        createQuote="Post"
-                        hostProp={host}
-                        localUsername={localUser.username}
-                        headerProp={header}
-                        reCall={allPostsCall}
-                        setMessageProp={setPostResponse}
-                        setDeploy={setCreatePostDeploy}
-                    />
-                }
-                {postResponse && <p>{postResponse}</p>}
-                <br />
-                <div>
-                    {allPosts.map((el) => (
-                        <Post 
-                            hostProp={host} 
-                            headerProp={header} 
-                            localUser={localUser} 
-                            user={el.user} 
-                            title={el.title} 
-                            text={el.text} 
-                            id={el["_id"]} 
-                            key={el["_id"]} 
-                            postReCall={allPostsCall}
+                <div style={dashboardStyles.header}><h1 style={ window.width > 200 ? dashboardStyles.title : dashboardStyles.hiddenTitle }>Forum</h1></div>
+                    <div style={dashboardStyles.dashboard}>
+                    <button onClick={() => setCreatePostDeploy(!createPostDeploy)}>New Post</button>
+                    <button onClick={invertPostsOrder}>{allPostsOrder? "Showing Oldest Posts First" : "Showing Newest Posts First"}</button>
+                    {createPostDeploy && 
+                        <FormToCreate 
+                            createQuote="Post"
+                            hostProp={host}
+                            localUsername={localUser.username}
+                            headerProp={header}
+                            reCall={allPostsCall}
+                            setMessageProp={setPostResponse}
+                            setDeploy={setCreatePostDeploy}
                         />
-                    ))}
+                    }
+                    {postResponse && <p>{postResponse}</p>}
+                    <br />
+                    <div>
+                        {allPosts.map((el) => (
+                            <Post 
+                                hostProp={host} 
+                                headerProp={header} 
+                                localUser={localUser} 
+                                user={el.user} 
+                                title={el.title} 
+                                text={el.text} 
+                                id={el["_id"]} 
+                                key={el["_id"]} 
+                                postReCall={allPostsCall}
+                            />
+                        ))}
+                    </div>
                 </div>
             </>
         );
