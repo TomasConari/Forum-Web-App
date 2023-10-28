@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginProp}) => {
+export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginProp }) => {
 
     const [signUser, setSignUser] = useState({
         name: "",
@@ -16,14 +16,14 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
     };
 
     const setSignUp = (event) => {
-        if((event.target.name === ("name")) || (event.target.name === ("lastname"))){
-            if(!/\d/.test(event.target.value)){
+        if ((event.target.name === ("name")) || (event.target.name === ("lastname"))) {
+            if (!/\d/.test(event.target.value)) {
                 setSignUser((prevUser) => ({
                     ...prevUser,
                     [event.target.name]: capitalize(event.target.value)
                 }));
             };
-        }else{
+        } else {
             setSignUser((prevUser) => ({
                 ...prevUser,
                 [event.target.name]: event.target.value
@@ -32,24 +32,24 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
     };
 
     const signUp = async () => {
-        if(!signUser.name || !signUser.lastname || !signUser.username || !signUser.password){
+        if (!signUser.name || !signUser.lastname || !signUser.username || !signUser.password) {
             errorProp("Please Fill All Fields");
             setTimeout(() => errorProp(""), 6000);
             return;
         };
-        if(signUser.password.length < 6){
+        if (signUser.password.length < 6) {
             errorProp("Password Should Be At Least 6 Characters Long");
             setTimeout(() => errorProp(""), 6000);
             return;
         };
-        try{
+        try {
             const response = await fetch(`${hostProp}/user/create`, {
-                method: 'POST',
+                method: "POST",
                 headers: headerProp,
                 body: JSON.stringify(signUser)
             });
-            try{
-                if(response.status === 201){
+            try {
+                if (response.status === 201) {
                     setSignUser({
                         name: "",
                         lastname: "",
@@ -60,30 +60,30 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
                     errorProp(`User Created, Please Log In`);
                     setTimeout(() => errorProp(""), 6000);
                 };
-            }catch(error){
+            } catch (error) {
                 errorProp("User Created, Message Error");
                 setTimeout(() => errorProp(""), 6000);
             };
-        }catch(error){
+        } catch (error) {
             errorProp("An Error Occurred");
             setTimeout(() => errorProp(""), 6000);
         };
     };
 
     const handleKeyDown = (event) => {
-        if(event.key === "Enter"){
+        if (event.key === "Enter") {
             signUp();
         };
     };
 
-    return(
+    return (
         <>
             <div className="user-box">
-                <input 
-                    name="name" 
-                    type="text" 
+                <input
+                    name="name"
+                    type="text"
                     autoComplete="off"
-                    value={signUser.name} 
+                    value={signUser.name}
                     onChange={setSignUp}
                     onKeyDown={handleKeyDown}
                 />
@@ -92,36 +92,36 @@ export const SignUp = ({ hostProp, headerProp, errorProp, setLoginProp, loginPro
             <div className="user-box">
                 <input
                     name="lastname"
-                    type="text" 
+                    type="text"
                     autoComplete="off"
-                    value={signUser.lastname} 
+                    value={signUser.lastname}
                     onChange={setSignUp}
                     onKeyDown={handleKeyDown}
                 />
                 <label>Lastname</label>
             </div>
             <div className="user-box">
-                <input 
+                <input
                     name="username"
                     type="text"
                     autoComplete="off"
-                    value={signUser.username} 
+                    value={signUser.username}
                     onChange={setSignUp}
                     onKeyDown={handleKeyDown}
                 />
                 <label>Username</label>
             </div>
             <div className="user-box">
-                <input 
+                <input
                     name="password"
-                    type="password" 
-                    value={signUser.password} 
+                    type="password"
+                    value={signUser.password}
                     onChange={setSignUp}
                     onKeyDown={handleKeyDown}
                 />
                 <label>Password</label>
             </div>
-            <a href="#" onClick={signUp}>
+            <a href="javascript:void(0)" onClick={signUp}>
                 Register
             </a>
         </>

@@ -1,11 +1,11 @@
-export const postStyles = {
+export const commentStyles = {
     imageStyle: {
         width: "30px", 
-        height: "30px", 
+        height: "30px",
         borderRadius: "5px"
     },
-    post: {
-        background: "rgba(0,0,0,.5)",
+    comment: {
+        background: "#000000",
         boxSizing: "border-box",
         boxShadow: "0 15px 25px rgba(0,0,0,.4)",
         borderRadius: "10px",
@@ -15,9 +15,9 @@ export const postStyles = {
         wordWrap: "break-word",
         whiteSpace: "pre-wrap",
         overflow: "hidden",
-        alignItems: "center",
+        alignItems: "center"
     },
-    optionsDeploy: {
+    commentOptionsDeploy: {
         position: "absolute",
         right: "6%",
         zIndex: "0",
@@ -27,7 +27,7 @@ export const postStyles = {
         color: "#fff",
         textDecoration: "none"
     },
-    blueButtonStyle: {
+    blackButtonStyle: {
         fontSize: "1.5em",
         color: "#0e161f",
         textDecoration: "none",

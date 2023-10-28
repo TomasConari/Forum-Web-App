@@ -9,26 +9,27 @@ export const FormToEdit = ({ headerProp, hostProp, id, user, eraseQuote, setMess
     });
 
     const edit = async () => {
-        try{
-            if(updateBody.title.length < 1){
+        try {
+            if (updateBody.title.length < 1) {
                 setMessageProp("Title can not be Empty");
                 setTimeout(() => setMessageProp(""), 6000);
                 return;
             };
-            if(updateBody.text.length < 1){
+            if (updateBody.text.length < 1) {
                 setMessageProp("Text can not be Empty");
                 setTimeout(() => setMessageProp(""), 6000);
                 return;
             };
+
             const response = await fetch(`${hostProp}/${eraseQuote}/update/${id}`, {
                 method: "PUT",
                 headers: headerProp,
                 body: JSON.stringify(updateBody)
             });
-            if(response.ok === false){
+            if (response.ok === false) {
                 setMessageProp(response.message);
                 setTimeout(() => setMessageProp(""), 6000);
-            }else{
+            } else {
                 setUpdateBody((prevBody) => ({
                     ...prevBody,
                     title: "",
@@ -39,7 +40,7 @@ export const FormToEdit = ({ headerProp, hostProp, id, user, eraseQuote, setMess
                 setMessageProp(response.message);
                 setTimeout(() => setMessageProp(""), 6000);
             };
-        }catch(error){
+        } catch (error) {
             setMessageProp("Connection Error, Try Again Later");
             setTimeout(() => setMessageProp(""), 6000);
         };
@@ -51,29 +52,29 @@ export const FormToEdit = ({ headerProp, hostProp, id, user, eraseQuote, setMess
             [event.target.name]: event.target.value
         }));
     };
-    
-    return(
+
+    return (
         <>
             <button onClick={() => setFormDeployProp(false)}>X</button>
             <div className="user-box">
-                <input 
+                <input
                     type="text"
                     name="title"
                     autoComplete="off"
                     placeholder="New Title"
-                    onChange={setBodyValues} 
+                    onChange={setBodyValues}
                 />
             </div>
             <div className="user-box">
-                <input 
+                <input
                     type="text"
                     name="text"
                     autoComplete="off"
                     placeholder="New Text"
-                    onChange={setBodyValues} 
+                    onChange={setBodyValues}
                 />
             </div>
-            <a href="#" onClick={edit}>
+            <a href="javascript:void(0)" onClick={edit}>
                 Save Changes
             </a>
         </>

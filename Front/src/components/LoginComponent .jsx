@@ -1,11 +1,11 @@
 import { useState } from "react";
-import jwt_decode from 'jwt-decode';
+import jwt_decode from "jwt-decode";
 
-export const LoginComponent  = ({ setUserInfoProp, hostProp, headerProp, setHeaderProp, authProp, errorProp }) => {
+export const LoginComponent = ({ setUserInfoProp, hostProp, headerProp, setHeaderProp, authProp, errorProp }) => {
 
     const [user, setUser] = useState({
-        username: '',
-        password: ''
+        username: "",
+        password: ""
     });
 
     const setUserAndPassword = (event) => {
@@ -19,15 +19,15 @@ export const LoginComponent  = ({ setUserInfoProp, hostProp, headerProp, setHead
         if(!(!user.username || !user.password)){
             try{
                 const response = await fetch(`${hostProp}/user/login`, {
-                    method: 'POST',
+                    method: "POST",
                     headers: headerProp,
                     body: JSON.stringify(user)
                 });
-                if(response.status === 200) {
+                if(response.status === 200){
                     const responseJson = await response.json();
                     setHeaderProp((prevHeader) => ({
                         ...prevHeader,
-                        'auth-token': responseJson.token
+                        "auth-token": responseJson.token
                     }));
                     setUser((prevUser) => {
                         const newUser = { ...prevUser };
@@ -35,9 +35,9 @@ export const LoginComponent  = ({ setUserInfoProp, hostProp, headerProp, setHead
                         return newUser;
                     });
                     authProp(true);
-                    localStorage.setItem('auth-token', responseJson.token);
+                    localStorage.setItem("auth-token", responseJson.token);
                     setUserInfoProp(jwt_decode(responseJson.token));
-                }else if(response.status === 401) {
+                }else if(response.status === 401){
                     setUser((prevUser) => {
                         const newUser = { ...prevUser };
                         newUser.password = "";
@@ -68,10 +68,10 @@ export const LoginComponent  = ({ setUserInfoProp, hostProp, headerProp, setHead
         };
     };
 
-    return(
+    return (
         <>
             <div className="user-box">
-                <input 
+                <input
                     type="text"
                     name="username"
                     autoComplete="off"
@@ -81,16 +81,16 @@ export const LoginComponent  = ({ setUserInfoProp, hostProp, headerProp, setHead
                 <label>Username</label>
             </div>
             <div className="user-box">
-                <input 
+                <input
                     type="password"
                     name="password"
-                    value={user.password} 
+                    value={user.password}
                     onChange={setUserAndPassword}
                     onKeyDown={handleKeyDown}
                 />
                 <label>Password</label>
             </div>
-            <a href="#" onClick={login}>
+            <a href="javascript:void(0)" onClick={login}>
                 Login
             </a>
         </>
