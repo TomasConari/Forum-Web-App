@@ -17,15 +17,15 @@ export const Comment = ({ id, localUser, user, title, text, headerProp, hostProp
         const currentTimestamp = currentDate.getTime();
         const timeDifference = currentTimestamp - postTimestamp;
         let timeAgoString = "";
-        if (timeDifference < 60000) {
+        if(timeDifference < 60000){
             timeAgoString = "Just now";
-        } else if (timeDifference < 3600000) {
+        }else if (timeDifference < 3600000){
             const minutes = Math.floor(timeDifference / 60000);
             timeAgoString = `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
-        } else if (timeDifference < 86400000) {
+        }else if(timeDifference < 86400000){
             const hours = Math.floor(timeDifference / 3600000);
             timeAgoString = `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
-        } else {
+        }else{
             const days = Math.floor(timeDifference / 86400000);
             timeAgoString = `${days} ${days === 1 ? "day" : "days"} ago`;
         };
@@ -35,7 +35,7 @@ export const Comment = ({ id, localUser, user, title, text, headerProp, hostProp
         calculateTimeAgo();
     }, []);
 
-    return (
+    return(
         <div>
             <div style={commentStyles.comment} id={id}>
                 <p style={commentStyles.white}>
@@ -140,10 +140,12 @@ export const Comment = ({ id, localUser, user, title, text, headerProp, hostProp
                                             hostProp={hostProp}
                                             id={id}
                                             user={user}
-                                            eraseQuote="Comment"
+                                            editQuote="Comment"
                                             setMessageProp={setAllMessages}
                                             reCall={reCallComments}
                                             setFormDeployProp={setCommentFormDeploy}
+                                            prevText={text}
+                                            prevTitle={title}
                                         />
                                     )}
                                 </div>

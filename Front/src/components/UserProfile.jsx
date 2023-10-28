@@ -1,10 +1,12 @@
 import { useState } from "react";
 import profileImage from "../images/profile.png"
 import { userProfileStyles } from "../styles/userProfileStyles";
+import { UserSettings } from "./UserSettings";
 
 export const UserProfile = ({ userObject, logoutProp, window }) => {
 
     const [userDeploy, setUserDeploy] = useState(false);
+    const [userSettingsDeploy, setUserSettingsDeploy] = useState(false);
 
     return (
         <div style={window.width > 200 ? userProfileStyles.userProfileStyle : userProfileStyles.hiddenUserProfileStyle}>
@@ -14,7 +16,7 @@ export const UserProfile = ({ userObject, logoutProp, window }) => {
                     <br />
                     <h6 style={userProfileStyles.usernameStyle} >{userObject.username}</h6>
                     <h6 style={userProfileStyles.nameStyle} >{userObject.name} {userObject.lastname}</h6>
-                    <a href="javascript:void(0)" style={userProfileStyles.buttonStyle} onClick={logoutProp}>
+                    <a href="javascript:void(0)" style={userProfileStyles.buttonStyle} onClick={() => setUserSettingsDeploy(!userSettingsDeploy)}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="1em"
@@ -44,6 +46,11 @@ export const UserProfile = ({ userObject, logoutProp, window }) => {
                         &nbsp;
                         Log Out
                     </a>
+                    {userSettingsDeploy &&
+                        <UserSettings 
+                            user={userObject}
+                        />
+                    }
                 </>
             }
         </div>

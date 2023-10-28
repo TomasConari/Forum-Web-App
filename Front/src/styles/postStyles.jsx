@@ -64,5 +64,35 @@ export const postStyles = {
     },
     white: {
         color: "#fff"
+    },
+    message: {
+        color: "#fff",
     }
+};
+
+export const commentIcon = {
+    showingComments:
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="m20.475 23.3l-5.3-5.3H4q-.825 0-1.413-.588T2 16V4.825L.675 3.5L2.1 2.075l19.8 19.8l-1.425 1.425ZM22 19.125L16.875 14H18v-2h-3.125l-1-1H18V9h-6.125l-1-1H18V6H8.875l-4-4H20q.825 0 1.413.588T22 4v15.125ZM6 14h5.175l-2-2H6v2Zm0-3h2.175l-2-2H6v2Z"
+            />
+        </svg>,
+    hiddinComments:
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M6 14h12v-2H6v2Zm0-3h12V9H6v2Zm0-3h12V6H6v2ZM4 18q-.825 0-1.413-.588T2 16V4q0-.825.588-1.413T4 2h16q.825 0 1.413.588T22 4v18l-4-4H4Z"
+            />
+        </svg>
 };

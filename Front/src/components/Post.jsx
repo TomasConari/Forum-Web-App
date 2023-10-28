@@ -5,35 +5,9 @@ import { Delete } from "./Delete";
 import { FormToCreate } from "./FormToCreate";
 import profileImage from "../images/profile.png";
 import { postStyles } from "../styles/postStyles";
+import { commentIcon } from "../styles/postStyles";
 
 export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, created, postReCall, setAllPostsMessage }) => {
-
-    const commentIcon = {
-        showingComments:
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    fill="currentColor"
-                    d="m20.475 23.3l-5.3-5.3H4q-.825 0-1.413-.588T2 16V4.825L.675 3.5L2.1 2.075l19.8 19.8l-1.425 1.425ZM22 19.125L16.875 14H18v-2h-3.125l-1-1H18V9h-6.125l-1-1H18V6H8.875l-4-4H20q.825 0 1.413.588T22 4v15.125ZM6 14h5.175l-2-2H6v2Zm0-3h2.175l-2-2H6v2Z"
-                />
-            </svg>,
-        hiddinComments:
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    fill="currentColor"
-                    d="M6 14h12v-2H6v2Zm0-3h12V9H6v2Zm0-3h12V6H6v2ZM4 18q-.825 0-1.413-.588T2 16V4q0-.825.588-1.413T4 2h16q.825 0 1.413.588T22 4v18l-4-4H4Z"
-                />
-            </svg>
-    };
 
     const [formDeploy, setFormDeploy] = useState(false);
     const [deleteDeploy, setDeleteDeploy] = useState(false);
@@ -46,7 +20,7 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, c
     const [optionsDeploy, setOptionsDeploy] = useState(false);
 
     const allCommentsCall = async () => {
-        try {
+        try{
             const rawData = await fetch(`${hostProp}/comments/from/${id}`, {
                 method: "GET",
                 headers: headerProp
@@ -54,7 +28,7 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, c
             const dataJson = await rawData.json();
             const dataArr = dataJson.data;
             setAllComments(dataArr.reverse());
-        } catch (error) {
+        }catch(error){
             setAllCommentMessage("There was an error getting the Comments");
             setTimeout(() => setAllCommentMessage(""), 6000);
         };
@@ -86,7 +60,7 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, c
         calculateTimeAgo();
     }, []);
 
-    return (
+    return(
         <div>
             <div style={postStyles.post}>
                 <p style={postStyles.white}>
@@ -188,9 +162,11 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, c
                                             setMessageProp={setPostMessage}
                                             reCall={postReCall}
                                             setFormDeployProp={setFormDeploy}
+                                            prevTitle={title}
+                                            prevText={text}
                                         />
                                     }
-                                    {postMessage && <a id="error"><span /><span /><span /><span />{postMessage}</a>}
+                                    {postMessage && <h3 style={postStyles.white}>{postMessage}</h3>}
                                 </div>
                             }
                         </div>
@@ -212,7 +188,6 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, c
                 </p>
                 {commentDeploy && (
                     <div style={postStyles.commentsSection}>
-                        <p>{allCommentMessage}</p>
                         <a
                             style={postStyles.whiteButtonStyle}
                             href="javascript:void(0)"
@@ -231,6 +206,7 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, c
                                 />
                             </svg>
                         </a>
+                        <h3 style={postStyles.message}>{allCommentMessage}</h3>
                         {createCommentDeploy &&
                             <FormToCreate
                                 id={id}

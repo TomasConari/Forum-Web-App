@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { createFormStyles } from "../styles/createFormStyles";
 
-export const FormToCreate = ({ id, createQuote, hostProp, localUsername, headerProp, reCall, setDeploy }) => {
+export const FormToCreate = ({ id, createQuote, hostProp, localUsername, headerProp, reCall, setDeploy, setMessageProp }) => {
 
-    const [errorMessage, setErrorMessage] = useState("");
+    const [errorMessage, setMessage] = useState("");
     const [createBody, setCreateBody] = useState({
         username: localUsername,
         title: "",
@@ -17,14 +17,14 @@ export const FormToCreate = ({ id, createQuote, hostProp, localUsername, headerP
     };
 
     const create = async () => {
-        try {
-            if (createBody.title.length > 25) {
-                setErrorMessage("The title cannot be more than 25 characters");
-                setTimeout(() => setErrorMessage(""), 4000);
-            } else if (createBody.text.length > 560) {
-                setErrorMessage("The text cannot be more than 560 characters");
-                setTimeout(() => setErrorMessage(""), 4000);
-            } else if ((createBody.title.length > 0) && (createBody.text.length > 0)) {
+        try{
+            if(createBody.title.length > 25){
+                setMessage("The title cannot be more than 25 characters");
+                setTimeout(() => setMessage(""), 4000);
+            }else if(createBody.text.length > 560){
+                setMessage("The text cannot be more than 560 characters");
+                setTimeout(() => setMessage(""), 4000);
+            }else if((createBody.title.length > 0) && (createBody.text.length > 0)){
                 const response = await fetch(url,
                     {
                         method: "POST",
@@ -32,21 +32,21 @@ export const FormToCreate = ({ id, createQuote, hostProp, localUsername, headerP
                         body: JSON.stringify(createBody)
                     }
                 );
-                if (response.ok === false) {
+                if(response.ok === false){
                     throw new Error;
-                } else {
+                }else{
                     reCall();
-                    setErrorMessage(`${createQuote} Created Succesfully`);
-                    setTimeout(() => setErrorMessage(""), 4000);
+                    setMessageProp(`${createQuote} Created Succesfully`);
+                    setTimeout(() => setMessageProp(""), 4000);
                     setDeploy(false);
                 };
-            } else {
-                setErrorMessage("Both Forms must be filled");
-                setTimeout(() => setErrorMessage(""), 4000);
+            }else{
+                setMessage("Both Forms must be filled");
+                setTimeout(() => setMessage(""), 4000);
             };
-        } catch (error) {
-            setErrorMessage(`An Error Occurred Creating The ${createQote}`);
-            setTimeout(() => setErrorMessage(""), 4000);
+        }catch(error){
+            setMessage(`An Error Occurred Creating The ${createQuote}`);
+            setTimeout(() => setMessage(""), 4000);
         };
     };
 
@@ -57,7 +57,7 @@ export const FormToCreate = ({ id, createQuote, hostProp, localUsername, headerP
         }));
     };
 
-    return (
+    return(
         <div style={createFormStyles.create}>
             <div style={{ display: "flex" }}>
                 <a
@@ -101,7 +101,7 @@ export const FormToCreate = ({ id, createQuote, hostProp, localUsername, headerP
                         />
                     </div>
                 </div>
-                {errorMessage && 
+                {errorMessage &&
                     <div>
                         <br />
                         <h3 style={createFormStyles.error}>{errorMessage}</h3>
