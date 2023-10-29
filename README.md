@@ -10,7 +10,7 @@ How to see it?
     2. Open the terminal and navigate to the repository location, 
     enter the Back folder.
     
-    3. Run "npm install" in your terminal.
+    3. Run "npm install" in your terminal (You need mongoDb installed on your computer).
     
     4. Run "npm run dev" in your terminal.
 
