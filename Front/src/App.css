@@ -5,7 +5,7 @@ html {
     margin:0;
     padding:0;
     font-family: sans-serif;
-    background: linear-gradient(#141e30, #243b55);
+    background: rgb(29,44,62);
   }
   .login-box {
     position: absolute;
@@ -28,7 +28,7 @@ html {
   .login-box .user-box {
     position: relative;
   }
-  .login-box .user-box input {
+  .user-box input {
     width: 100%;
     padding: 10px 0;
     font-size: 16px;
@@ -49,6 +49,12 @@ html {
     pointer-events: none;
     transition: .5s;
   }
+
+  input::placeholder, textarea::placeholder {
+    letter-spacing: 4px;
+  }
+
+  
   
   .login-box form a {
     position: relative;
@@ -64,13 +70,39 @@ html {
     letter-spacing: 2px;
     text-align: center;
   }
-  
   .login-box a:hover {
     background: #03e9f4;
     color: #fff;
     border-radius: 5px;
   }
   
+  .deleteButtons a {
+    text-decoration: none;
+    transition: .5s;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: #fff;
+  }
+
+  .deleteButtons a:hover {
+    background: #03e9f4;
+    color: #fff;
+    border-radius: 5px;
+  }
+
+  .createButtons a {
+    text-decoration: none;
+    transition: .5s;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: #fff;
+  }
+
+  .createButtons a:hover {
+    background: #03e9f4;
+    color: #fff;
+    border-radius: 5px;
+  }
   .login-box a span {
     position: absolute;
     display: block;
@@ -156,9 +188,5 @@ html {
   #error:hover{
     color: #f40303;
     font-size: 12px;
-    background-color: #141e30;
+    background-color: rgba(0,0,0,.5);
   }
-
-.comments{
-  background-color: #fff;
-}
