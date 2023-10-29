@@ -41,7 +41,7 @@ export const FormToEdit = ({ headerProp, hostProp, id, user, editQuote, setMessa
                 setMessageProp(`${editQuote} Edited Succesfully`);
                 setTimeout(() => setMessageProp(""), 6000);
             };
-        }catch(error) {
+        }catch(error){
             setErrorMessage("Connection Error, Try Again Later");
             setTimeout(() => setErrorMessage(""), 6000);
         };

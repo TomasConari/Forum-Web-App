@@ -104,7 +104,6 @@ export const userControllers = {
     },
     update: async (req, res) => {
         try{
-            const { username: localUser, role: localRole} = req.user;
             const { username: paramUser } = req.params;
             const { 
                 currentPassword: bodyCurrentPassword, 
@@ -120,90 +119,69 @@ export const userControllers = {
                 username: bodyUser,
                 password: newHash
             };
-            if(localUser === paramUser){
+            try{
+                const user = await User.findOne({ username: paramUser });
+                if(!user){
+                    return res.status(401).json({
+                        ok: false,
+                        message: "User not found"
+                    });
+                };
+                const hash = user.password;
                 try{
-                    const user = await User.findOne({ username: paramUser });
-                    if(!user){
-                        return res.status(401).json({
-                            ok: false,
-                            message: "User not found"
-                        });
-                    };
-                    const hash = user.password;
-                    try{
-                        bcrypt.compare(bodyCurrentPassword, hash, async (err, result) => {
-                            if(result){
-                                try{
-                                    const updatedUser = await User.findOneAndUpdate({ username: paramUser }, newData, { new: true });
-                                    const updatePosts = await Post.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
-                                    const updateComments = await Comment.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
-                                    if(!(updatedUser === null) && ((updatePosts === null) && (updateComments === null))){
-                                        return res.status(500).json({
-                                            ok: false,
-                                            message: "Could not Find and Update the User"
-                                        });
-                                    }else{
-                                        const { _id, name, lastname, username, role } = updatedUser;
-                                        const payload = {
-                                            id: _id,
-                                            name,
-                                            lastname,
-                                            username,
-                                            role
-                                        };
-                                        const token = Jwt.sign(payload, "secretKey");
-                                        return res.status(200).json({
-                                            ok: true,
-                                            token,
-                                            updatedUser
-                                        });
-                                    };
-                                }catch(error){
-                                    console.error(error);
+                    bcrypt.compare(bodyCurrentPassword, hash, async (err, result) => {
+                        if(result){
+                            try{
+                                const updatedUser = await User.findOneAndUpdate({ username: paramUser }, newData, { new: true });
+                                const updatePosts = await Post.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                                const updateComments = await Comment.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
+                                if(!(updatedUser === null) && ((updatePosts === null) && (updateComments === null))){
                                     return res.status(500).json({
                                         ok: false,
-                                        message: "Error Updating the User"
+                                        message: "Could not Find and Update the User"
+                                    });
+                                }else{
+                                    const { _id, name, lastname, username, role } = updatedUser;
+                                    const payload = {
+                                        id: _id,
+                                        name,
+                                        lastname,
+                                        username,
+                                        role
+                                    };
+                                    const token = Jwt.sign(payload, "secretKey");
+                                    return res.status(200).json({
+                                        ok: true,
+                                        token,
+                                        updatedUser
                                     });
                                 };
-                            }else{
-                                return res.status(401).json({
+                            }catch(error){
+                                console.error(error);
+                                return res.status(500).json({
                                     ok: false,
-                                    message: "Incorrect Password"
+                                    message: "Error Updating the User"
                                 });
                             };
-                        });
-                    }catch(error){
-                        console.error(error);
-                        return res.status(500).json({
-                            ok: false,
-                            message: "Error Verifying The Password"
-                        });
-                    };
+                        }else{
+                            return res.status(401).json({
+                                ok: false,
+                                message: "Incorrect Password"
+                            });
+                        };
+                    });
                 }catch(error){
                     console.error(error);
-                    res.status(500).json({
+                    return res.status(500).json({
                         ok: false,
-                        message: "An Error Occurred During the Update"
+                        message: "Error Verifying The Password"
                     });
                 };
-            }else if(localRole === "admin"){
-                const updatedUser = await User.findOneAndUpdate({ username: paramUser }, newData, { new: true });
-                const updatePosts = await Post.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
-                const updateComments = await Comment.updateMany({ user: paramUser }, { user: newData.username }, { new: true });
-                if(!(updatedUser === null) && ((updatePosts === null) && (updateComments === null))){
-                    res.status(500).json({
-                        message: "Could not Find and Update the User"
-                    });
-                }else{
-                    res.status(200).json({
-                        message: "User Updated",
-                        data: updatedUser
-                    });
-                };
-            }else{
-                res.status(403).json({ 
-                    message: "Unauthorized",
-                    role: localRole
+            }catch(error){
+                console.error(error);
+                res.status(500).json({
+                    ok: false,
+                    message: "An Error Occurred During the Update"
                 });
             };
         }catch(error){

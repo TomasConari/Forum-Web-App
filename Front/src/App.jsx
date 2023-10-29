@@ -14,6 +14,7 @@ const App = () => {
 
   //States
 
+  const [userSettingsDeploy, setUserSettingsDeploy] = useState(false);
   const [error, setError] = useState("");
   const [Auth, setAuth] = useState(false);
   const [login, setLogin] = useState(true);
@@ -115,7 +116,7 @@ const App = () => {
   }else{
     return (
       <div>
-        <UserProfile userObject={userInfo} logoutProp={logOut} window={windowSize} />
+        <UserProfile userObject={userInfo} logoutProp={logOut} window={windowSize} setSettingsDeploy={setUserSettingsDeploy} />
         <Dashboard localUser={userInfo} host={host} header={header} window={windowSize} />
       </div>
     );

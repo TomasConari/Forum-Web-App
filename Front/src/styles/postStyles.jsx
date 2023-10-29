@@ -19,7 +19,7 @@ export const postStyles = {
     },
     optionsDeploy: {
         position: "absolute",
-        right: "6%",
+        right: "60px",
         zIndex: "0",
     },
     whiteButtonStyle: {
@@ -38,7 +38,6 @@ export const postStyles = {
         background: "#1c2b3d",
         borderRadius: "10px",
         padding: "10px",
-        paddingBottom: "0px",
         paddingBottom: "10px",
         maxHeight: "80vh",
         overflowY: "auto",

@@ -13,7 +13,6 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, c
     const [deleteDeploy, setDeleteDeploy] = useState(false);
     const [commentDeploy, setCommentDeploy] = useState(false);
     const [createCommentDeploy, setCreateCommentDeploy] = useState(false);
-    const [postMessage, setPostMessage] = useState("");
     const [allComments, setAllComments] = useState([]);
     const [allCommentMessage, setAllCommentMessage] = useState("");
     const [timeAgo, setTimeAgo] = useState("");
@@ -158,15 +157,14 @@ export const Post = ({ hostProp, headerProp, localUser, id, user, title, text, c
                                             hostProp={hostProp}
                                             id={id}
                                             user={user}
-                                            eraseQuote={"Post"}
-                                            setMessageProp={setPostMessage}
+                                            editQuote={"Post"}
+                                            setMessageProp={setAllPostsMessage}
                                             reCall={postReCall}
                                             setFormDeployProp={setFormDeploy}
                                             prevTitle={title}
                                             prevText={text}
                                         />
                                     }
-                                    {postMessage && <h3 style={postStyles.white}>{postMessage}</h3>}
                                 </div>
                             }
                         </div>
