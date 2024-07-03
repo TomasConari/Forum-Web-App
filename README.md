@@ -1,4 +1,4 @@
-# Forum Bootcamp Final Proyect
+# Forum App Web
 Basic Forum, FrontEnd made in ReactJs and BackEnd in NodeJs using MongoDB
 
 Although the project has been delivered, there are plans to improve it.
