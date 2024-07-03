@@ -4,15 +4,15 @@ I'm currently working on getting it to run inside a Docker container.
 
 Frontend technologies used:
 
-    - Vite.
-    - ReactJS.
+    - Vite
+    - ReactJS
 
 
 Backend technologies used:
 
-    - Node.js.
-    - Express.
-    - MongoDB.
+    - Node.js
+    - Express
+    - MongoDB
 
 
 How to see it?
