@@ -1,7 +1,19 @@
 # Forum Web App
-Basic Forum, FrontEnd made in ReactJs and BackEnd in NodeJs using MongoDB
-
+Basic Forum Web App.
 I'm currently working on getting it to run inside a Docker container.
+
+Frontend technologies used:
+
+    - Vite.
+    - ReactJS.
+
+
+Backend technologies used:
+
+    - Node.js.
+    - Express.
+    - MongoDB.
+
 
 How to see it?
 
@@ -22,6 +34,7 @@ How to see it?
     7. Run "npm run dev" in your terminal 
     (If you run the FrontEnd without the BackEnd running, the application will not work).
 
+
 Project Info:
 
     - The application functions as a basic forum social network.
@@ -30,11 +43,13 @@ Project Info:
     - Despite the project has been delivered,
     I will continue to develop it and implement improvements.
 
+
 Last Changes:
 
     -Minor Login and SignUp Functionality Fixes.
     -Updated Login UI.
     -Login and Signup Are Now Individual Components.
+
         
 My Links:
 
