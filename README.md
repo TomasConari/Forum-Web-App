@@ -27,7 +27,7 @@ Project Info:
     - The application functions as a basic forum social network.
     You can create an account, log in, create posts, and view those of other users.
     
-    - Despite the project has been delivered and evaluated by the bootcamp, 
+    - Despite the project has been delivered,
     I will continue to develop it and implement improvements.
 
 Last Changes:
