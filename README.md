@@ -1,7 +1,7 @@
 # Forum Web App
 Basic Forum, FrontEnd made in ReactJs and BackEnd in NodeJs using MongoDB
 
-Although the project has been delivered, there are plans to improve it.
+I'm currently working on getting it to run inside a Docker container.
 
 How to see it?
 
